@@ -1,3 +1,6 @@
+# Line feeds of text files
+* text=auto
+
 # Do not diff 3d models
 *.stp  -diff
 *.step -diff
