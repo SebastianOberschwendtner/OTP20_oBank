@@ -1,0 +1,4 @@
+# Do not diff 3d models
+*.stp  -diff
+*.step -diff
+*.stl  -diff
