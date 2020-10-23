@@ -1,3 +1,20 @@
+# Ignore the raw cad files
+10_CAD
+
+# ignore platformio outputs
+.pio
+
+# Gitignores specific for VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
 # Prerequisites
 *.d
 
