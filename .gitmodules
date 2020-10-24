@@ -1,0 +1,3 @@
+[submodule "05_Wiki"]
+	path = 05_Wiki
+	url = https://github.com/knuffel-v2/OTP20_oBank.wiki.git
