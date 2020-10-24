@@ -11,6 +11,8 @@ Open Source Power Bank with Power Delivery Capability.
 
 >More information can be found in the *beautiful* [wiki](https://github.com/knuffel-v2/OTP20_oBank/wiki/home).
 
+>:construction: The **schematic** and **PCB** are designed with *CircuitMaker*. The project can be found [here](https://circuitmaker.com/Projects/Details/SebastianOberschwendtner/OTP-20oBank).
+
 ## Software Framework
 <!-- ![IDE1](https://img.shields.io/static/v1?label=IDE&message=Eclipse&color=yellowgreen) -->
 ![IDE2](https://img.shields.io/static/v1?label=IDE&message=VSCode&color=yellowgreen)
