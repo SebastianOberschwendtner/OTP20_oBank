@@ -4,7 +4,7 @@
 ![release](https://img.shields.io/github/v/release/knuffel-v2/OTP20_oBank?color=green)
 ![issues](https://img.shields.io/github/issues-raw/knuffel-v2/OTP20_oBank)
 ![bugs](https://img.shields.io/github/issues/knuffel-v2/OTP20_oBank/bug?color=red)
-![Status](https://img.shields.io/static/v1?label=status&message=In-Preparation&color=yellowgreen)
+![Status](https://img.shields.io/badge/Status-In%20Preparation-yellowgreen)
 
 Open Source Power Bank with Power Delivery Capability.
 
