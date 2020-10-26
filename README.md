@@ -1,4 +1,4 @@
-![Card](../../wiki/01_Logos/Card_oBank_v001.png)
+![Card](../../wiki/01_Logos/Header_oBank_v001.png)
 # OTP-20_oBank
 
 ![tag](https://img.shields.io/github/v/tag/knuffel-v2/OTP20_oBank?color=green)
