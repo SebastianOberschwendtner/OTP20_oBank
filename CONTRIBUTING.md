@@ -100,7 +100,7 @@ A function header gives a short **description**, defines the **inputs** and the 
 
 Symbols for commits:
 - :art: `:art:` Improvements in the *User Experience*
-- :bug: `:bug:` Bugfixes
+- :bug: `:bug:` Bugfix
 - :racehorse: `:racehorse:` Performance Improvement
 - :wrench: `:wrench:`Minor Improvement or Fix
 - :mag: `:mag:` Made Code More Readable
@@ -119,7 +119,7 @@ The following should be included in every file header:
 > Adjust the name of the author according to who created the file.
 ```c
 /**
- * joVario Firmware
+ * OTP-20 oBank Firmware
  * Copyright (c) 2020 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
