@@ -105,6 +105,7 @@ Symbols for commits:
 - :wrench: `:wrench:`Minor Improvement or Fix
 - :mag: `:mag:` Made Code More Readable
 - :memo: `:memo:` Improved Documentation
+- :nut_and_bolt: `:nut_and_bolt:` Hardware Uploads and Fixes
 
 # Release Management
 *Tags* are used for the release management. The tag number is:
