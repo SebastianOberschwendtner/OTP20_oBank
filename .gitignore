@@ -1,5 +1,6 @@
 # Ignore the raw cad files
 10_CAD
+*.FCStd1
 
 # ignore platformio outputs
 .pio
