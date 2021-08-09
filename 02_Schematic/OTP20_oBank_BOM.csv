@@ -1,5 +1,4 @@
 Designator;Comment;Description;Quantity;Footprint Name;Order from;Manufacturer;Manufacturer Part Number
-
 "C1, C2, C24";"470 nF";"Capacitor, MLCC, 0805";"3";"0805";"Reichelt";"";""
 "C3, C29, C38, C40, C41, C42, C43, C53, C59, C60, C61, C77";"100 nF";"Capacitor, MLCC, 0805";"12";"0805";"Reichelt";"";""
 "C4, C5";"1 nF";"Capacitor, MLCC, 0805";"2";"0805";"Reichelt";"";""
