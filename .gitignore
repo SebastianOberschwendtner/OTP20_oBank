@@ -2,16 +2,20 @@
 10_CAD
 *.FCStd1
 
+# Ignore secondary docmentation
+20_Invoices
+
 # ignore platformio outputs
 .pio
 
 # Gitignores specific for VSCode
-.vscode/*
+*/.vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
+01_Code/.gitignore
 
 # Local History for Visual Studio Code
 .history/
