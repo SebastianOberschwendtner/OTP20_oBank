@@ -52,37 +52,37 @@ bool SSD1306::Controller::initialize(void)
     this->i2c->set_target_address(i2c_address);
 
     // send the initialization data
-    if (!this->send_command_byte(display_off))          return false;
-    if (!this->send_command_byte(set_disp_clock_div))   return false;
-    if (!this->send_command_byte(0x80))                 return false;
-    if (!this->send_command_byte(set_multiplex))        return false;
-    if (!this->send_command_byte(0x1F))                 return false;
-    if (!this->send_command_byte(set_display_offset))   return false;
-    if (!this->send_command_byte(0x00))                 return false;
-    if (!this->send_command_byte(set_startline))        return false;
-    if (!this->send_command_byte(charge_pump))          return false;
-    if (!this->send_command_byte(0x14))                 return false;
-    if (!this->send_command_byte(memory_mode))          return false;
-    if (!this->send_command_byte(0x00))                 return false;
-    if (!this->send_command_byte(0xA1))                 return false;
-    if (!this->send_command_byte(com_scan_dec))         return false;
-    if (!this->send_command_byte(set_com_pins))         return false;
-    if (!this->send_command_byte(0x02))                 return false;
-    if (!this->send_command_byte(set_contrast))         return false;
-    if (!this->send_command_byte(0x8F))                 return false;
-    if (!this->send_command_byte(set_precharge))        return false;
-    if (!this->send_command_byte(0xF1))                 return false;
-    if (!this->send_command_byte(set_vcom_detect))      return false;
-    if (!this->send_command_byte(0x40))                 return false;
-    if (!this->send_command_byte(display_ram))          return false;
-    if (!this->send_command_byte(display_normal))       return false;
-    if (!this->send_command_byte(scroll_deactivate))    return false;
-    if (!this->send_command_byte(column_address))       return false;
-    if (!this->send_command_byte(0x00))                 return false;
-    if (!this->send_command_byte(0x7F))                 return false;
-    if (!this->send_command_byte(page_address))         return false;
-    if (!this->send_command_byte(0x00))                 return false;
-    if (!this->send_command_byte(0x03))                 return false;
+    if (!this->send_command_byte(Command::display_off))          return false;
+    if (!this->send_command_byte(Command::set_disp_clock_div))   return false;
+    if (!this->send_command_data(0x80))                          return false;
+    if (!this->send_command_byte(Command::set_multiplex))        return false;
+    if (!this->send_command_data(0x1F))                          return false;
+    if (!this->send_command_byte(Command::set_display_offset))   return false;
+    if (!this->send_command_data(0x00))                          return false;
+    if (!this->send_command_byte(Command::set_startline))        return false;
+    if (!this->send_command_byte(Command::charge_pump))          return false;
+    if (!this->send_command_data(0x14))                          return false;
+    if (!this->send_command_byte(Command::memory_mode))          return false;
+    if (!this->send_command_data(0x00))                          return false;
+    if (!this->send_command_data(0xA1))                          return false;
+    if (!this->send_command_byte(Command::com_scan_dec))         return false;
+    if (!this->send_command_byte(Command::set_com_pins))         return false;
+    if (!this->send_command_data(0x02))                          return false;
+    if (!this->send_command_byte(Command::set_contrast))         return false;
+    if (!this->send_command_data(0x8F))                          return false;
+    if (!this->send_command_byte(Command::set_precharge))        return false;
+    if (!this->send_command_data(0xF1))                          return false;
+    if (!this->send_command_byte(Command::set_vcom_detect))      return false;
+    if (!this->send_command_data(0x40))                          return false;
+    if (!this->send_command_byte(Command::display_ram))          return false;
+    if (!this->send_command_byte(Command::display_normal))       return false;
+    if (!this->send_command_byte(Command::scroll_deactivate))    return false;
+    if (!this->send_command_byte(Command::column_address))       return false;
+    if (!this->send_command_data(0x00))                          return false;
+    if (!this->send_command_data(0x7F))                          return false;
+    if (!this->send_command_byte(Command::page_address))         return false;
+    if (!this->send_command_data(0x00))                          return false;
+    if (!this->send_command_data(0x03))                          return false;
 
     return true;
 };
@@ -92,7 +92,22 @@ bool SSD1306::Controller::initialize(void)
  * @param cmd The command byte to send.
  * @return Returns True when the command was sent successfully.
  */
-bool SSD1306::Controller::send_command_byte(const unsigned char cmd)
+bool SSD1306::Controller::send_command_byte(const Command cmd)
+{
+    // Set the payload, a single byte sends always two bytes:
+    // The first byte (0x00) indicates that the following data
+    // is a command
+    this->payload.byte[1] = 0x00;
+    this->payload.byte[0] = static_cast<unsigned char>(cmd);
+    return this->i2c->send_data(this->payload, 2);
+};
+
+/**
+ * @brief Send a command with a single data byte to the display
+ * @param cmd The command byte to send.
+ * @return Returns True when the command was sent successfully.
+ */
+bool SSD1306::Controller::send_command_data(const unsigned char cmd)
 {
     // Set the payload, a single byte sends always two bytes:
     // The first byte (0x00) indicates that the following data
@@ -108,7 +123,7 @@ bool SSD1306::Controller::send_command_byte(const unsigned char cmd)
  */
 bool SSD1306::Controller::on(void)
 {
-    return this->send_command_byte(display_on);
+    return this->send_command_byte(Command::display_on);
 };
 
 /**
@@ -117,7 +132,7 @@ bool SSD1306::Controller::on(void)
  */
 bool SSD1306::Controller::off(void)
 {
-    return this->send_command_byte(display_off);
+    return this->send_command_byte(Command::display_off);
 };
 
 /**

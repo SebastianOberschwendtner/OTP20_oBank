@@ -29,40 +29,43 @@ namespace SSD1306 {
     constexpr unsigned char i2c_address         = 0x3C<<1; // 011110+SA0+RW - 0x3C or 0x3D
 
     // commands
-    constexpr unsigned char set_contrast        = 0x81;
-    constexpr unsigned char display_ram         = 0xA4;
-    constexpr unsigned char display_all_on      = 0xA5;
-    constexpr unsigned char display_normal      = 0xA6;
-    constexpr unsigned char display_inverted    = 0xA7;
-    constexpr unsigned char display_off         = 0xAE;
-    constexpr unsigned char display_on          = 0xAF;
-    constexpr unsigned char set_display_offset  = 0xD3;
-    constexpr unsigned char set_com_pins        = 0xDA;
-    constexpr unsigned char set_vcom_detect     = 0xDB;
-    constexpr unsigned char set_disp_clock_div  = 0xD5;
-    constexpr unsigned char set_precharge       = 0xD9;
-    constexpr unsigned char set_multiplex       = 0xA8;
-    constexpr unsigned char set_column_low      = 0x00;
-    constexpr unsigned char set_column_high     = 0x10;
-    constexpr unsigned char set_startline       = 0x40;
-    constexpr unsigned char memory_mode         = 0x20;
-    constexpr unsigned char column_address      = 0x21;
-    constexpr unsigned char page_address        = 0x22;
-    constexpr unsigned char com_scan_inc        = 0xC0;
-    constexpr unsigned char com_scan_dec        = 0xC8;
-    constexpr unsigned char seg_remap           = 0xA0;
-    constexpr unsigned char charge_pump         = 0x8D;
-    constexpr unsigned char external_vcc        = 0x01;
-    constexpr unsigned char switch_cap_vcc      = 0x02;
-
-    // Scrolling
-    constexpr unsigned char scroll_activate     = 0x2F;
-    constexpr unsigned char scroll_deactivate   = 0x2E;
-    constexpr unsigned char scroll_set_vertical = 0xA3;
-    constexpr unsigned char scroll_hori_right   = 0x26;
-    constexpr unsigned char scroll_hori_left    = 0x27;
-    constexpr unsigned char scroll_vert_hori_left  = 0x29;
-    constexpr unsigned char scroll_vert_hori_right = 0x2A;
+    enum class Command: unsigned char
+    {
+        set_contrast        = 0x81,
+        display_ram         = 0xA4,
+        display_all_on      = 0xA5,
+        display_normal      = 0xA6,
+        display_inverted    = 0xA7,
+        display_off         = 0xAE,
+        display_on          = 0xAF,
+        set_display_offset  = 0xD3,
+        set_com_pins        = 0xDA,
+        set_vcom_detect     = 0xDB,
+        set_disp_clock_div  = 0xD5,
+        set_precharge       = 0xD9,
+        set_multiplex       = 0xA8,
+        set_column_low      = 0x00,
+        set_column_high     = 0x10,
+        set_startline       = 0x40,
+        memory_mode         = 0x20,
+        column_address      = 0x21,
+        page_address        = 0x22,
+        com_scan_inc        = 0xC0,
+        com_scan_dec        = 0xC8,
+        seg_remap           = 0xA0,
+        charge_pump         = 0x8D,
+        external_vcc        = 0x01,
+        switch_cap_vcc      = 0x02,
+    
+        // Scrolling
+        scroll_activate     = 0x2F,
+        scroll_deactivate   = 0x2E,
+        scroll_set_vertical = 0xA3,
+        scroll_hori_right   = 0x26,
+        scroll_hori_left    = 0x27,
+        scroll_vert_hori_left  = 0x29,
+        scroll_vert_hori_right = 0x2A
+    };
 
     // === Classes ===
     class Controller
@@ -73,7 +76,8 @@ namespace SSD1306 {
         I2C::Data_t payload;
 
         // *** methods ***
-        bool        send_command_byte(const unsigned char cmd);
+        bool        send_command_byte(const Command cmd);
+        bool        send_command_data(const unsigned char cmd);
 
     public:
         // *** Constructor ***
