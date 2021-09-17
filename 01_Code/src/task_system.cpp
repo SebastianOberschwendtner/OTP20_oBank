@@ -44,9 +44,11 @@ void Task_System(void)
     GPIO::PIN Button(GPIO::PORTA, GPIO::PIN0, GPIO::INPUT);
     GPIO::PIN Led_Green(GPIO::PORTB, GPIO::PIN0, GPIO::OUTPUT);
     GPIO::PIN Led_Red(GPIO::PORTB, GPIO::PIN1, GPIO::OUTPUT);
+    GPIO::PIN EN_OTG(GPIO::PORTB, GPIO::PIN5, GPIO::OUTPUT);
+    GPIO::PIN EN_5V_USB(GPIO::PORTB, GPIO::PIN6, GPIO::OUTPUT);
 
     // *** get the GUI interface
-    YIELD_WHILE(!IPC::Manager::get_data(1));
+    YIELD_WHILE(!IPC::Manager::get_data(PID::Display));
     Graphics::Canvas_BW* p_GUI = 
         reinterpret_cast<Graphics::Canvas_BW*>
         (IPC::Manager::get_data(PID::Display).value());
@@ -83,15 +85,35 @@ void Task_System(void)
     else
     {
         char err_msg[5] = {0};
-        std::sprintf(&err_msg[0], "%-03d", i2c.get_error()); 
+        std::sprintf(&err_msg[0], "%-3d", static_cast<int>(i2c.get_error())); 
         p_GUI->add_string("....... ");
         p_GUI->add_string(err_msg);
     };
+
+    i2c.set_error(Error::Code::None);
+    BQ25700::Controller charger(i2c);
+    if(charger.get_state() == BQ25700::State::Init)
+        p_GUI->add_string("\nSuccess!");
+    else
+        p_GUI->add_string("\nError!");
+
+    charger.set_OTG_voltage(5200);
+    charger.set_OTG_current(1000);
+    charger.enable_OTG(true);
+    EN_OTG.setHigh(); 
+
+    if(i2c.get_error() == Error::Code::None)
+        p_GUI->add_string("\n OTG enabled!");
 
     // Start looping
     while(1)
     {
         Led_Red.set(Button.get());
+        if(Button.get())
+            EN_5V_USB.setHigh();
+
+        Led_Green.set(EN_5V_USB.get());
+
         OTOS::Task::yield();
     };
 };

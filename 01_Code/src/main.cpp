@@ -35,7 +35,6 @@ OTOS::Kernel OS;
 
 int main(void)
 {
-        
     // Schedule Threads
     OS.scheduleThread(&Task_System, OTOS::Check::StackSize<256>(), OTOS::PrioHigh);
     OS.scheduleThread(&Task_Display, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
@@ -45,4 +44,4 @@ int main(void)
 
     // Never reached
     return 0;
-}
+};

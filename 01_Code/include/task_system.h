@@ -28,6 +28,7 @@
 #include "pid.h"
 #include "graphics.h"
 #include "drivers.h"
+#include "bq25700.h"
 
 // === Declarations
 void        Task_System        (void);
