@@ -346,3 +346,26 @@ bool MAX17205::Controller::read_cell_voltage(void)
 
     return true;
 };
+
+/**
+ * @brief Read the avg cell voltages of the balancer
+ * @return Returns true when the cell voltages are updated successfully.
+ */
+bool MAX17205::Controller::read_cell_voltage_avg(void)
+{
+    // Read the raw values
+    unsigned char reg = static_cast<unsigned char>(Register::Avg_Cell_2);
+    if(!this->i2c->read_array(reg, &this->i2c_data.byte[0], 4)) return false;
+
+    // Convert the data
+    // Cell 2
+    unsigned int temp = this->i2c_data.byte[3];
+    temp += this->i2c_data.byte[2] << 8;
+    this->voltage_cell[0] = this->to_voltage(temp);
+    // Cell 2
+    temp = this->i2c_data.byte[1];
+    temp += this->i2c_data.byte[0] << 8;
+    this->voltage_cell[1] = this->to_voltage(temp);
+
+    return true;
+};

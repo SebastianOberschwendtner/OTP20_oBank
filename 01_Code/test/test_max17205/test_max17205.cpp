@@ -94,7 +94,7 @@ public:
  *      ✓ Cell Voltage
  *      ▢ Average Cell Voltage
  *      ✓ Current
- *      ▢ Average Current
+ *      ✓ Average Current
  *      ▢ Temperature
  *      ▢ Resistance
  *      ▢ Time
@@ -261,6 +261,26 @@ void test_read_battery_current_avg(void)
     TEST_ASSERT_EQUAL(500, UUT.get_battery_current());
 };
 
+/// @brief test reading the cell voltage
+void test_read_cell_voltage_avg(void)
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    MAX17205::Controller UUT(i2c);
+
+    // perform test
+    i2c.rx_data.byte[3] = 0x00;
+    i2c.rx_data.byte[2] = 0xA5;
+    i2c.rx_data.byte[1] = 0x00;
+    i2c.rx_data.byte[0] = 0xD2;
+    TEST_ASSERT_TRUE(UUT.read_cell_voltage_avg());
+    TEST_ASSERT_EQUAL( 3300, UUT.get_cell_voltage(1));
+    TEST_ASSERT_EQUAL( 4200, UUT.get_cell_voltage(2));
+    i2c.call_read_array.assert_called_once_with(0xD3);
+};
+
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
@@ -272,6 +292,7 @@ int main(int argc, char** argv)
     test_read_battery_current();
     test_read_cell_voltage();
     test_read_battery_current_avg();
+    test_read_cell_voltage_avg();
     UNITY_END();
     return 0;
 };

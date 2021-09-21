@@ -47,6 +47,10 @@ namespace MAX17205 {
         Current         = 0x00A,
         Avg_Current     = 0x00B,
         PackCfg         = 0x0BD,
+        Avg_Cell_4      = 0x0D1,
+        Avg_Cell_3      = 0x0D2,
+        Avg_Cell_2      = 0x0D3,
+        Avg_Cell_1      = 0x0D4,
         Cell_4          = 0x0D5,
         Cell_3          = 0x0D6,
         Cell_2          = 0x0D7,
@@ -103,6 +107,7 @@ namespace MAX17205 {
         bool            read_battery_current    (void);
         bool            read_battery_current_avg(void);
         bool            read_cell_voltage       (void);
+        bool            read_cell_voltage_avg   (void);
 
 
     };
