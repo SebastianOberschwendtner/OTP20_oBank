@@ -66,6 +66,7 @@ public:
         if (reg == 0xFE) this->rx_data.value = 0x4000;
         if (reg == 0xFF) this->rx_data.value = 0x7900;
         return true; };
+    bool read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes) override {return true; } ;
     I2C::Data_t  get_rx_data (void) const override { return this->rx_data; };
 };
 

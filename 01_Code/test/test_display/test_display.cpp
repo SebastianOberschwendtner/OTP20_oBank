@@ -67,6 +67,7 @@ public:
     bool read_data           (const unsigned char reg, unsigned char n_bytes) override { return true; };
     bool read_byte           (const unsigned char reg) override { return true; };
     bool read_word           (const unsigned char reg) override { return true; };
+    bool read_array          (const unsigned char reg, unsigned char* dest, const unsigned char n_bytes) override {return true; } ;
     I2C::Data_t  get_rx_data (void) const override { I2C::Data_t data; return data; };
 };
 

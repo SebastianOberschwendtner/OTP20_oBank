@@ -29,6 +29,9 @@
 #include "graphics.h"
 #include "drivers.h"
 #include "bq25700.h"
+#include "max17205.h"
+#include "tps65987.h"
+
 
 // === Declarations
 void        Task_System        (void);

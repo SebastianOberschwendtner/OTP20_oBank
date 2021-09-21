@@ -33,7 +33,7 @@
 // === Functions ===
 
 /**
- * @brief Constructor for display controller.
+ * @brief Constructor for charger controller.
  * @param i2c_controller The reference to the used i2c peripheral.
  */
 BQ25700::Controller::Controller(I2C::Controller_Base& i2c_controller):
