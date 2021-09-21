@@ -91,9 +91,9 @@ public:
  *      ▢ PROCHOT (input)
  * ▢ controller can set options:
  *      ▢ options registers
- *      ▢ Charge current
- *      ▢ OTG current
- *      ▢ OTG voltage
+ *      ✓ Charge current
+ *      ✓ OTG current
+ *      ✓ OTG voltage
  * ▢ Controller can read the battery status
  *      ▢ whether it is charging
  *      ▢ whether OTG is enabled

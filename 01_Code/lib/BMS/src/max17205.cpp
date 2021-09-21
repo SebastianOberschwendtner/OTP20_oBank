@@ -308,6 +308,23 @@ bool MAX17205::Controller::read_battery_current(void)
 };
 
 /**
+ * @brief Read the average pack current from the balancer and convert to mA.
+ * @return Returns True when the pack current was read successfully.
+ */
+bool MAX17205::Controller::read_battery_current_avg(void)
+{
+    // Read the Current Register
+    if(!this->read_register(Register::Avg_Current)) return false;
+
+    // convert the data
+    unsigned int temp = 0;
+    temp += this->i2c_data.byte[0];
+    temp += (this->i2c_data.byte[1] << 8);
+    this->current_battery = this->to_current(temp);
+    return true;
+};
+
+/**
  * @brief Read the cell voltages of the balancer
  * @return Returns true when the cell voltages are updated successfully.
  */

@@ -45,6 +45,7 @@ namespace MAX17205 {
     enum class Register: unsigned int
     {
         Current         = 0x00A,
+        Avg_Current     = 0x00B,
         PackCfg         = 0x0BD,
         Cell_4          = 0x0D5,
         Cell_3          = 0x0D6,
@@ -100,6 +101,7 @@ namespace MAX17205 {
         bool            write_register          (const Register reg, const unsigned int data);
         bool            read_battery_voltage    (void);
         bool            read_battery_current    (void);
+        bool            read_battery_current_avg(void);
         bool            read_cell_voltage       (void);
 
 
