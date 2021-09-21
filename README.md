@@ -16,6 +16,8 @@ Open Source Power Bank with Power Delivery Capability.
 
 ## Software Framework
 <!-- ![IDE1](https://img.shields.io/static/v1?label=IDE&message=Eclipse&color=yellowgreen) -->
+![GitHub Build Status](https://img.shields.io/github/workflow/status/knuffel-v2/OTP20_oBank/Build%20Firmware)
+![GitHub Test Status](https://img.shields.io/github/workflow/status/knuffel-v2/OTP20_oBank/Unit%20Test?label=test)
 ![IDE2](https://img.shields.io/static/v1?label=IDE&message=VSCode&color=yellowgreen)
 ![GitHub top language](https://img.shields.io/github/languages/top/knuffel-v2/OTP20_oBank?color=brightgreen)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/knuffel-v2/OTP20_oBank)
