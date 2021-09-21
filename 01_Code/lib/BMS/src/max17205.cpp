@@ -55,7 +55,7 @@ bool MAX17205::Controller::initialize(void)
     /// @todo Should the configuration just be written every time and not checked?
     unsigned int config = this->i2c_data.word[0];
     if(! (config & ChEn))
-        return this->write_register(Register::PackCfg, (TdEn | ChEn | 2U));
+        return this->write_register(Register::PackCfg, (TdEn | ChEn | BALCFG_1 | BALCFG_0 | 2U));
 
     return true;
 };
