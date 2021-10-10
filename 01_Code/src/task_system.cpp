@@ -31,8 +31,20 @@
 #include "task_system.h"
 
 // === Global data within task ===
+// *** I/O pins ***
+static GPIO::PIN Led_Green(GPIO::PORTB, GPIO::PIN0, GPIO::OUTPUT);
+static GPIO::PIN Led_Red(GPIO::PORTB, GPIO::PIN1, GPIO::OUTPUT);
+static GPIO::PIN EN_5V(GPIO::PORTB, GPIO::PIN6, GPIO::OUTPUT);
+static GPIO::PIN Button(GPIO::PORTA, GPIO::PIN0, GPIO::INPUT);
+// *** IPC Interface to other tasks ***
+Display_Interface* task_display;
+BMS_Interface* task_bms;
+PD_Interface* task_pd;
 
 // === Functions ===
+static void initialize(void);
+static void configure_sleep(void) ;
+static void get_ipc(void);
 
 /**
  * @brief Main task for system stuff of the oBank
@@ -40,78 +52,94 @@
 void Task_System(void)
 {
     // Setup stuff
-    // *** I/O pins ***
-    GPIO::PIN Button(GPIO::PORTA, GPIO::PIN0, GPIO::INPUT);
-    GPIO::PIN Led_Green(GPIO::PORTB, GPIO::PIN0, GPIO::OUTPUT);
-    GPIO::PIN Led_Red(GPIO::PORTB, GPIO::PIN1, GPIO::OUTPUT);
-    GPIO::PIN EN_OTG(GPIO::PORTB, GPIO::PIN5, GPIO::OUTPUT);
-    GPIO::PIN EN_5V_USB(GPIO::PORTB, GPIO::PIN6, GPIO::OUTPUT);
-    GPIO::PIN CHRG_OK(GPIO::PORTA, GPIO::PIN2, GPIO::INPUT);
-    CHRG_OK.setPull(GPIO::PULL_UP);
+    initialize();
 
-    // *** get the GUI interface
-    YIELD_WHILE(!IPC::Manager::get_data(PID::Display));
-    Graphics::Canvas_BW* p_GUI = 
-        reinterpret_cast<Graphics::Canvas_BW*>
-        (IPC::Manager::get_data(PID::Display).value());
+    // *** Sleep Mode ***
+    configure_sleep();
 
-    // *** Create the main i2c controller ***
-    GPIO::PIN SCL(GPIO::PORTA, GPIO::PIN9, GPIO::OUTPUT);
-    GPIO::PIN SDA(GPIO::PORTA, GPIO::PIN10, GPIO::OUTPUT);
-    I2C::Controller i2c(I2C::I2C_1, 100000);
-    i2c.assign_pin(SCL);
-    i2c.assign_pin(SDA);
-    i2c.enable();
-    i2c.set_target_address(0x40);
-    p_GUI->add_string("PD Controller");
+    // *** Get IPC data ***
+    get_ipc();
 
-    // *** Create the controller for the balancer **
-    MAX17205::Controller Balancer(i2c);
-
-    // *** Create the controller for the PD IC ***
-    TPS65987::Controller PD(i2c);
-    if(!PD.initialize())
-        i2c.generate_stop();
-    OTOS::Task::yield();
-
-    PD.read_mode();
-    p_GUI->add_char(
-        static_cast<unsigned char>(PD.get_mode()) + 48
-    );
-
-    OTOS::Task::yield();
-    Balancer.initialize(); 
-
-    OTOS::Task::yield();
-    char line_string[24] = {0};
-
+    unsigned long counter = 0;
     // Start looping
     while(1)
     {
+        Led_Green.set(EN_5V.get());
         Button.read_edge();
-        if(Button.rising_edge()) Led_Red.toggle();
-        EN_5V_USB.set(Button.get());
-        Led_Green.set(CHRG_OK.get());
-
-        Balancer.read_battery_voltage();
-        Balancer.read_battery_current();
-        Balancer.read_cell_voltage();
-        Balancer.read_register(MAX17205::Register::Cell_3);
-
-        p_GUI->set_cursor(0, 1);
-        std::sprintf(line_string, "Voltage: %04d mV", Balancer.get_battery_voltage());
-        p_GUI->add_string(line_string);
-
-        p_GUI->set_cursor(0, 2);
-        std::sprintf(line_string, "Current: %04d mA", Balancer.get_battery_current());
-        p_GUI->add_string(line_string);
-
-        p_GUI->set_cursor(0, 3);
-        std::sprintf(line_string, "U1: %04d mV", Balancer.get_cell_voltage(1));
-        p_GUI->add_string(line_string);
-        std::sprintf(line_string, " U2: %04d mV", Balancer.get_cell_voltage(2));
-        p_GUI->add_string(line_string);
+        if (Button.rising_edge())
+        {
+            counter = 0;
+            EN_5V.toggle();
+        }
+        counter++;
+        if(counter > 300)
+        {
+            counter = 0;
+            Led_Green.setLow();
+            task_display->sleep();
+            task_bms->sleep();
+            task_pd->sleep();
+            __WFI();
+            task_display->wake();
+            task_bms->wake();
+            task_pd->wake();
+            Button.read_edge();
+        }
 
         OTOS::Task::yield();
     };
+};
+
+/**
+ * @brief Initialize the system task.
+ */
+static void initialize(void)
+{
+    // Enable the interrupt for button input to wake up from sleep
+    Button.enable_interrupt(GPIO::Edge::Rising);
+    // Make sure that 5V Output is disabled
+    EN_5V.setLow();
+
+    // Yield for other tasks
+    OTOS::Task::yield();
+};
+
+/**
+ * @brief Configure the sleepmode.
+ */
+static void configure_sleep(void)
+{
+    // Setup the Sleep mode
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    PWR->CSR = 0;
+    // PWR->CR = 0;
+    PWR->CR |= PWR_CR_ULP | PWR_CR_LPSDSR;   // V_{REFINT} is off in low-power mode
+    // PWR->CR |= PWR_CR_PDDS;
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+};
+
+/**
+ * @brief Get the IPC data needed for task execution
+ */
+static void get_ipc(void)
+{
+    // Display Task
+    while (!IPC::Manager::get_data(PID::Display)) OTOS::Task::yield(); 
+    task_display = static_cast<Display_Interface*>(IPC::Manager::get_data(PID::Display).value());
+
+    // BMS Task
+    while (!IPC::Manager::get_data(PID::BMS)) OTOS::Task::yield(); 
+    task_bms = static_cast<BMS_Interface*>(IPC::Manager::get_data(PID::BMS).value());
+
+    // PD Task
+    while (!IPC::Manager::get_data(PID::PD)) OTOS::Task::yield(); 
+    task_pd = static_cast<PD_Interface*>(IPC::Manager::get_data(PID::PD).value());
+};
+
+/**
+ * @brief Interrupt handler for wake up interrupt.
+ */
+extern "C" void EXTI0_1_IRQHandler(void)
+{
+    Button.reset_pending_interrupt();
 };

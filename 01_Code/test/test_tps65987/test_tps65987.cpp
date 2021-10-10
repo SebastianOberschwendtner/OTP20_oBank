@@ -91,7 +91,7 @@ public:
  * ✓ controller can write registers with variable length
  * ✓ controller can send commands
  * ✓ controller can read the mode the PD IC is in
- * ▢ controller initializes the PD IC based on its mode
+ * ✓ controller initializes the PD IC based on its mode
  * ▢ controller can check whether command was finished
  * ▢ controller can read the return code of a finished command
  * ▢ controller can read the PD status
@@ -233,6 +233,84 @@ void test_initialization(void)
     TEST_ASSERT_EQUAL_CHAR_ARRAY("PTCc", i2c.rx_data.byte, 4);
 };
 
+/// @brief Test the reading of the PD status
+void test_read_PD_status(void)
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    TPS65987::Controller UUT(i2c);
+
+    // Response with all zeros
+    i2c.rx_data.byte[0] = 0x00;
+    i2c.rx_data.byte[1] = 0x00;
+    i2c.rx_data.byte[2] = 0x00;
+    i2c.rx_data.byte[3] = 0x00;
+    TEST_ASSERT_TRUE(UUT.read_PD_status());
+    i2c.call_set_target_address.assert_called_once_with(TPS65987::i2c_address);
+    i2c.call_read_array.assert_called_once_with(5);
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().role);
+    TEST_ASSERT_EQUAL(3, UUT.get_active_contract().USB_type);
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().voltage);
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().current);
+
+    // Plug type is USB2.0
+    i2c.rx_data.byte[0] = 0x00;
+    i2c.rx_data.byte[1] = 0x00;
+    i2c.rx_data.byte[2] = 0x00;
+    i2c.rx_data.byte[3] = TPS65987::PlugDetails_0;
+    TEST_ASSERT_TRUE(UUT.read_PD_status());
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().role);
+    TEST_ASSERT_EQUAL(2, UUT.get_active_contract().USB_type);
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().voltage);
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().current);
+
+    // USB default current
+    i2c.rx_data.byte[0] = 0x00;
+    i2c.rx_data.byte[1] = 0x00;
+    i2c.rx_data.byte[2] = 0x00;
+    i2c.rx_data.byte[3] = TPS65987::CCPullUp_0;
+    TEST_ASSERT_TRUE(UUT.read_PD_status());
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().role);
+    TEST_ASSERT_EQUAL(3, UUT.get_active_contract().USB_type);
+    TEST_ASSERT_EQUAL(5000, UUT.get_active_contract().voltage);
+    TEST_ASSERT_EQUAL(900, UUT.get_active_contract().current);
+
+    // USB 1.5A
+    i2c.rx_data.byte[0] = 0x00;
+    i2c.rx_data.byte[1] = 0x00;
+    i2c.rx_data.byte[2] = 0x00;
+    i2c.rx_data.byte[3] = TPS65987::CCPullUp_1;
+    TEST_ASSERT_TRUE(UUT.read_PD_status());
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().role);
+    TEST_ASSERT_EQUAL(3, UUT.get_active_contract().USB_type);
+    TEST_ASSERT_EQUAL(5000, UUT.get_active_contract().voltage);
+    TEST_ASSERT_EQUAL(1500, UUT.get_active_contract().current);
+
+    // USB 3.0A
+    i2c.rx_data.byte[0] = 0x00;
+    i2c.rx_data.byte[1] = 0x00;
+    i2c.rx_data.byte[2] = 0x00;
+    i2c.rx_data.byte[3] = TPS65987::CCPullUp_1 | TPS65987::CCPullUp_0;
+    TEST_ASSERT_TRUE(UUT.read_PD_status());
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().role);
+    TEST_ASSERT_EQUAL(3, UUT.get_active_contract().USB_type);
+    TEST_ASSERT_EQUAL(5000, UUT.get_active_contract().voltage);
+    TEST_ASSERT_EQUAL(3000, UUT.get_active_contract().current);
+
+    // Role source
+    i2c.rx_data.byte[0] = 0x00;
+    i2c.rx_data.byte[1] = 0x00;
+    i2c.rx_data.byte[2] = 0x00;
+    i2c.rx_data.byte[3] = TPS65987::PresentRole;
+    TEST_ASSERT_TRUE(UUT.read_PD_status());
+    TEST_ASSERT_EQUAL(1, UUT.get_active_contract().role);
+    TEST_ASSERT_EQUAL(3, UUT.get_active_contract().USB_type);
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().voltage);
+    TEST_ASSERT_EQUAL(0, UUT.get_active_contract().current);
+};
+
 /// === Run Tests ===
 int main(int argc, char** argv)
 {
@@ -244,6 +322,8 @@ int main(int argc, char** argv)
     test_write_command();
     test_read_mode();
     test_initialization();
+    test_read_mode();
+    test_read_PD_status();
     UNITY_END();
     return 0;
 };

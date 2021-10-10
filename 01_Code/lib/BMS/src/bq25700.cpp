@@ -41,25 +41,6 @@ i2c(&i2c_controller)
 {
     // Reset i2c data buffer
     this->i2c_data.value = 0x00;
-
-    // check whether device is responding and the IDs match
-    /// @todo Should the constructor already use the i2c bus?
-    this->state = State::Error;
-    if(this->read_register(Register::Manufacturer_ID))
-    {
-        if(this->i2c_data.byte[0] == manufacturer_id)
-            this->state = State::Init;
-        else
-            this->state = State::Error;
-    };
-
-    if(this->read_register(Register::Device_ID))
-    {
-        if(this->i2c_data.byte[0] == device_id)
-            this->state = State::Init;
-        else
-            this->state = State::Error;
-    };
 };
 
 /**
@@ -105,6 +86,23 @@ bool BQ25700::Controller::write_register(const Register reg,
  */
 bool BQ25700::Controller::initialize(void)
 {
+    // check whether device is responding and the IDs match
+    this->state = State::Error;
+    if(this->read_register(Register::Manufacturer_ID))
+    {
+        if(this->i2c_data.byte[0] == manufacturer_id)
+            this->state = State::Init;
+        else
+            this->state = State::Error;
+    };
+
+    if(this->read_register(Register::Device_ID))
+    {
+        if(this->i2c_data.byte[0] == device_id)
+            this->state = State::Init;
+        else
+            this->state = State::Error;
+    };
     return true;
 };
 

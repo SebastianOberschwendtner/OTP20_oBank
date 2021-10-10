@@ -33,11 +33,14 @@
 // === Functions ===
 OTOS::Kernel OS;
 
+// === Main ===
 int main(void)
 {
     // Schedule Threads
-    OS.scheduleThread(&Task_System, OTOS::Check::StackSize<256>(), OTOS::PrioHigh);
-    OS.scheduleThread(&Task_Display, OTOS::Check::StackSize<256>(), OTOS::PrioNormal);
+    OS.scheduleThread(&Task_System , OTOS::Check::StackSize<512>(), OTOS::PrioHigh);
+    OS.scheduleThread(&Task_Display, OTOS::Check::StackSize<512>(), OTOS::PrioNormal);
+    OS.scheduleThread(&Task_BMS    , OTOS::Check::StackSize<512>(), OTOS::PrioNormal);
+    OS.scheduleThread(&Task_PD     , OTOS::Check::StackSize<512>(), OTOS::PrioNormal);
 
     // Start the task execution
     OS.start();

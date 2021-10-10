@@ -18,22 +18,29 @@
  *
  */
 
-#ifndef TASK_SYSTEM_H_
-#define TASK_SYSTEM_H_
+#ifndef TASK_PD_H_
+#define TASK_PD_H_
 
 // === Includes ===
-#include <string>
 #include "task.h"
 #include "ipc.h"
 #include "pid.h"
 #include "drivers.h"
+#include "tps65987.h"
 
-// === Other Tasks ===
-#include "task_display.h"
-#include "task_bms.h"
-#include "task_pd.h"
+// === Task object ===
+class PD_Interface
+{
+    public:
+    // *** Constructor ***
+    PD_Interface() {};
+
+    // *** Methods ***
+    void    sleep(void);
+    void    wake(void);
+};
 
 // === Declarations ===
-void        Task_System        (void);
+void        Task_PD        (void);
 
 #endif

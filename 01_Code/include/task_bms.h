@@ -18,22 +18,33 @@
  *
  */
 
-#ifndef TASK_SYSTEM_H_
-#define TASK_SYSTEM_H_
+#ifndef TASK_BMS_H_
+#define TASK_BMS_H_
 
 // === Includes ===
-#include <string>
 #include "task.h"
 #include "ipc.h"
 #include "pid.h"
 #include "drivers.h"
+#include "bq25700.h"
+#include "max17205.h"
 
-// === Other Tasks ===
-#include "task_display.h"
-#include "task_bms.h"
-#include "task_pd.h"
+// === Task object ===
+class BMS_Interface
+{
+    public:
+    // *** Constructor ***
+    BMS_Interface() {};
+
+    // *** Methods ***
+    void            sleep               (void);
+    void            wake                (void);
+    unsigned int    get_battery_voltage (void) const;
+    signed int      get_battery_current (void) const;
+    BQ25700::State  get_charger_state   (void) const;
+};
 
 // === Declarations ===
-void        Task_System        (void);
+void        Task_BMS        (void);
 
 #endif

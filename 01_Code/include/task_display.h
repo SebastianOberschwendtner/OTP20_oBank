@@ -30,7 +30,22 @@
 #include "graphics.h"
 #include "ssd1306.h"
 
-// === Declarations
-void        Task_Display        (void);
+// === Other Tasks ===
+#include "task_bms.h"
+
+// === Task object ===
+class Display_Interface
+{
+    public:
+    // *** Constructor ***
+    Display_Interface() {};
+
+    // *** Methods ***
+    void    sleep(void);
+    void    wake(void);
+};
+
+// === Declarations ===
+void        Task_Display    (void);
 
 #endif

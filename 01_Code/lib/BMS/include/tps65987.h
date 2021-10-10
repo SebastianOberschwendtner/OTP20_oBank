@@ -52,6 +52,9 @@ namespace TPS65987 {
         constexpr reg_t Mode        = {0x03, 4};
         constexpr reg_t Cmd1        = {0x08, 4};
         constexpr reg_t Data1       = {0x09, 64};   
+        constexpr reg_t TX_Sink_Cap = {0x33, 57};
+        constexpr reg_t Active_PDO  = {0x34, 6};
+        constexpr reg_t Active_RDO  = {0x35, 4};
         constexpr reg_t PD_Status   = {0x40, 4};
     }; // namespace Register
 
@@ -98,6 +101,7 @@ namespace TPS65987 {
         bool            read_active_command (void);
         bool            write_command       (const char* cmd);
         bool            read_mode           (void);
+        bool            read_PD_status      (void);
     };
 };
 #endif

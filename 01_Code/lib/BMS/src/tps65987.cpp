@@ -150,3 +150,64 @@ bool TPS65987::Controller::write_command(const char* cmd)
     };
     return true;
  }
+
+ /**
+  * @brief Read the current PD status from the PD Controller.
+  * @return Returns True when the status was read successfully.
+  */
+ bool TPS65987::Controller::read_PD_status(void)
+ {
+     // Read the status register
+     if (!this->read_register(Register::PD_Status)) return false;
+
+     // Convert the received data
+    this->i2c_data.byte[3] = this->buffer_data[1];
+    this->i2c_data.byte[2] = this->buffer_data[2];
+    this->i2c_data.byte[1] = this->buffer_data[3];
+    this->i2c_data.byte[0] = this->buffer_data[4];
+
+    // Check plug type
+    unsigned char temp = this->i2c_data.byte[0];
+    if (temp & PlugDetails_0)
+        this->contract_active.USB_type = 2;
+    else 
+        this->contract_active.USB_type = 3;
+
+    // Active role
+    if (temp & PresentRole)
+        this->contract_active.role = 1;
+    else
+        this->contract_active.role = 0;
+
+    // Check CC Mode
+    temp = (temp & (CCPullUp_0 | CCPullUp_1)) >> 2;
+    switch (temp)
+    {
+        // USB Default power
+        case 1: 
+            this->contract_active.voltage = 5000; 
+            this->contract_active.current = 900; 
+            break;
+
+        // USB power increased to 1.5A
+        case 2: 
+            this->contract_active.voltage = 5000; 
+            this->contract_active.current = 1500;
+            break;
+
+        // USB power increased to 3.0A
+        case 3: 
+            this->contract_active.voltage = 5000; 
+            this->contract_active.current = 3000;
+            break;
+
+        // No cable or contract
+        default: 
+            this->contract_active.voltage = 0; 
+            this->contract_active.current = 0;
+            break;
+    };
+
+
+     return true;
+ };

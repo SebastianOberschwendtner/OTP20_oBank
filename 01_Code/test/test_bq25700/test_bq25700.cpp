@@ -78,7 +78,7 @@ public:
  *      ✓ OTG voltage (setpoint) in xx.x V
  *      ✓ OTG current (setpoint) in x.xxx A
  *      ✓ Charge current (setpoint) in x.xxx A
- * ✓ Controller checks whether target is responding during construction of the controller.
+ * ✓ Controller checks whether target is responding during initialization of the controller.
  * ▢ Controller has states:
  *      ▢ Init
  *      ▢ Idle
@@ -115,7 +115,7 @@ void tearDown(void) {
 
 // === Define Tests ===
 /// @brief Test the constructor
-void test_init(void)
+void test_constructor(void)
 {
     // Setup the mocked i2c driver
     I2C_Mock i2c;
@@ -130,6 +130,19 @@ void test_init(void)
     TEST_ASSERT_EQUAL(4480, UUT.get_OTG_voltage()); // OTG reset voltage is 4.480 V
     TEST_ASSERT_EQUAL(0, UUT.get_OTG_current());
     TEST_ASSERT_EQUAL(0, UUT.get_charge_current());
+};
+
+/// @brief Test initializing the controller
+void test_init(void)
+{
+    // Setup the mocked i2c driver
+    I2C_Mock i2c;
+
+    // create the controller object
+    BQ25700::Controller UUT(i2c);
+
+    // perform testing
+    TEST_ASSERT_TRUE(UUT.initialize());
     i2c.call_set_target_address.assert_called_last_with(0x12);
     i2c.call_read_word.assert_called_last_with(0xFF);
     TEST_ASSERT_EQUAL(2, i2c.call_read_word.call_count);
@@ -178,6 +191,7 @@ void test_set_options(void)
 int main(int argc, char** argv)
 {
     UNITY_BEGIN();
+    test_constructor();
     test_init();
     test_set_options();
     UNITY_END();

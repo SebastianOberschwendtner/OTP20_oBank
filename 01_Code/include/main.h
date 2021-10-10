@@ -21,9 +21,7 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-// === Define kernel parameters
-#define OTOS_STACK_SIZE     512U
-#define OTOS_NUMBER_THREADS 3U
+// === Define kernel parameters => have to be defined in platformio.ini
 
 // === Includes ===
 #include "kernel.h"
@@ -31,5 +29,7 @@
 // === Tasks ===
 #include "task_system.h"
 #include "task_display.h"
+#include "task_bms.h"
+#include "task_pd.h"
 
 #endif

@@ -25,8 +25,11 @@
 namespace PID {
     enum PID: unsigned char
     {
-        System = 0,
-        Display = 1
+        System  = 0,
+        Display = 1,
+        BMS     = 2, // Battery Management
+        PD      = 3, // Power Delivery Controller
+        GUI     = 4  // GUI Interface
     };
 };
 #endif
