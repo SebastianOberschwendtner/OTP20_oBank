@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    task_display.cpp
  * @author  SO
- * @version v1.0.0
+ * @version v2.0.0
  * @date    14-September-2021
  * @brief   Display task of the oBank
  ******************************************************************************
@@ -32,10 +32,10 @@
 
 // === Global data within task ===
 // *** I/O pins ***
-static GPIO::PIN SCL(GPIO::PORTA, GPIO::PIN8);
-static GPIO::PIN SDA(GPIO::PORTB, GPIO::PIN4);
+static GPIO::PIN SCL(GPIO::Port::A, 8);
+static GPIO::PIN SDA(GPIO::Port::B, 4);
 // *** i2c controller ***
-static I2C::Controller i2c(I2C::I2C_3, 100000);
+static I2C::Controller i2c(IO::I2C_3, 100000);
 // *** Display controller ***
 static SSD1306::Controller Display(i2c);
 // *** Display buffer ***
@@ -85,14 +85,14 @@ static void initialize(void)
     ipc_manager.register_data(&ipc_interface);
 
     // Set up the i2c interface
-    i2c.assign_pin(SCL);
-    i2c.assign_pin(SDA);
+    SCL.set_alternate_function(IO::I2C_3);
+    SDA.set_alternate_function(IO::I2C_3);
     i2c.enable();
 
     // Initialize the display
     Display.initialize();
 
-    // Empty the canavas
+    // Empty the canvas
     GUI.fill(Graphics::Black);
 
     // Write the first content in canvas    

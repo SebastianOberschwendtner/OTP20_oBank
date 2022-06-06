@@ -26,8 +26,6 @@
 #include "ipc.h"
 #include "pid.h"
 #include "drivers.h"
-#include "bq25700.h"
-#include "max17205.h"
 
 // === Task object ===
 class BMS_Interface

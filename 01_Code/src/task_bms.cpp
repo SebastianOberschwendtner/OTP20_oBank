@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    task_bms.cpp
  * @author  SO
- * @version v1.0.0
+ * @version v2.0.0
  * @date    09-October-2021
  * @brief   Task for the Battery Management of the oBank
  ******************************************************************************
@@ -32,11 +32,11 @@
 
 // === Global data within task ===
 // *** I/O pins ***
-static GPIO::PIN CHR_OK(GPIO::PORTA, GPIO::PIN2, GPIO::INPUT);
-static GPIO::PIN SCL(GPIO::PORTA, GPIO::PIN9);
-static GPIO::PIN SDA(GPIO::PORTA, GPIO::PIN10);
+static GPIO::PIN CHR_OK(GPIO::Port::A, 2, GPIO::Mode::Input);
+static GPIO::PIN SCL(GPIO::Port::A, 9);
+static GPIO::PIN SDA(GPIO::Port::A, 10);
 // *** i2c controller ***
-static I2C::Controller i2c(I2C::I2C_1, 100000);
+static I2C::Controller i2c(IO::I2C_1, 100000);
 // *** Charger controller ***
 static BQ25700::Controller Charger(i2c);
 // *** BMS chip ***
@@ -45,6 +45,9 @@ static MAX17205::Controller BMS(i2c);
 static IPC::Manager ipc_manager(IPC::Check::PID<PID::BMS>());
 // *** IPC Interface ***
 static BMS_Interface ipc_interface;
+
+// Extern LED_RED PIN
+static GPIO::PIN Led_Red(GPIO::Port::B, 1, GPIO::Mode::Output);
 
 // === Functions ===
 static void initialize(void);
@@ -65,10 +68,18 @@ void Task_BMS(void)
         BMS.read_battery_voltage();
 
         // Manage charging
-        if (CHR_OK.get())
+        if (CHR_OK.get_state())
         {
-            // Input power is present
-            // Charger.set_charge_current(500);
+            // Input power is present, set charge current
+            if(Charger.set_charge_current(1000))
+                Led_Red.set_state(true);
+            else
+                Led_Red.set_state(false);
+        }
+        else
+        {
+            // Turn off red LED
+        Led_Red.set_state(false);
         }
 
         OTOS::Task::yield();
@@ -84,12 +95,12 @@ static void initialize(void)
     ipc_manager.register_data(&ipc_interface);
 
     // Set up the i2c interface
-    i2c.assign_pin(SCL);
-    i2c.assign_pin(SDA);
+    SCL.set_alternate_function(IO::I2C_1);
+    SDA.set_alternate_function(IO::I2C_1);
     i2c.enable();
 
     // Initialize the charger interface
-    CHR_OK.setPull(GPIO::PULL_UP);
+    CHR_OK.set_pull(GPIO::Pull::Pull_Up);
     CHR_OK.enable_interrupt(GPIO::Edge::Rising);
     Charger.initialize();
 
@@ -111,7 +122,7 @@ extern "C" void EXTI2_3_IRQHandler(void)
 void BMS_Interface::sleep(void)
 {
     // Disable the pullup to save power
-    CHR_OK.setPull(GPIO::NO_PP);
+    CHR_OK.set_pull(GPIO::Pull::No_Pull);
 };
 
 /**
@@ -120,7 +131,7 @@ void BMS_Interface::sleep(void)
 void BMS_Interface::wake(void)
 {
     // Enable the pullup to sense whether an input is present
-    CHR_OK.setPull(GPIO::PULL_UP);
+    CHR_OK.set_pull(GPIO::Pull::Pull_Up);
 };
 
 /**

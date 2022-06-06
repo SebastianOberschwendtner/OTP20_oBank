@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    task_system.cpp
  * @author  SO
- * @version v1.0.0
+ * @version v2.0.0
  * @date    16-September-2021
  * @brief   Main system task of the oBank.
  ******************************************************************************
@@ -32,10 +32,10 @@
 
 // === Global data within task ===
 // *** I/O pins ***
-static GPIO::PIN Led_Green(GPIO::PORTB, GPIO::PIN0, GPIO::OUTPUT);
-static GPIO::PIN Led_Red(GPIO::PORTB, GPIO::PIN1, GPIO::OUTPUT);
-static GPIO::PIN EN_5V(GPIO::PORTB, GPIO::PIN6, GPIO::OUTPUT);
-static GPIO::PIN Button(GPIO::PORTA, GPIO::PIN0, GPIO::INPUT);
+static GPIO::PIN Led_Green(GPIO::Port::B, 0, GPIO::Mode::Output);
+static GPIO::PIN Led_Red(GPIO::Port::B, 1, GPIO::Mode::Output);
+static GPIO::PIN EN_5V(GPIO::Port::B, 6, GPIO::Mode::Output);
+static GPIO::PIN Button(GPIO::Port::A, 0, GPIO::Mode::Input);
 // *** IPC Interface to other tasks ***
 Display_Interface* task_display;
 BMS_Interface* task_bms;
@@ -64,7 +64,7 @@ void Task_System(void)
     // Start looping
     while(1)
     {
-        Led_Green.set(EN_5V.get());
+        Led_Green.set_state(EN_5V.get_state());
         Button.read_edge();
         if (Button.rising_edge())
         {
@@ -75,7 +75,7 @@ void Task_System(void)
         if(counter > 300)
         {
             counter = 0;
-            Led_Green.setLow();
+            Led_Green.set_low();
             task_display->sleep();
             task_bms->sleep();
             task_pd->sleep();
@@ -98,7 +98,7 @@ static void initialize(void)
     // Enable the interrupt for button input to wake up from sleep
     Button.enable_interrupt(GPIO::Edge::Rising);
     // Make sure that 5V Output is disabled
-    EN_5V.setLow();
+    EN_5V.set_low();
 
     // Yield for other tasks
     OTOS::Task::yield();

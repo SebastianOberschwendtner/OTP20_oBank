@@ -28,7 +28,6 @@
 #include "pid.h"
 #include "drivers.h"
 #include "graphics.h"
-#include "ssd1306.h"
 
 // === Other Tasks ===
 #include "task_bms.h"

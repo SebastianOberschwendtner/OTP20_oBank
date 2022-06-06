@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    task_pd.cpp
  * @author  SO
- * @version v1.0.0
+ * @version v2.0.0
  * @date    09-October-2021
  * @brief   Task for handling the Power Delivery of the oBank
  ******************************************************************************
@@ -32,10 +32,10 @@
 
 // === Global data within task ===
 // *** I/O pins ***
-static GPIO::PIN SCL(GPIO::PORTA, GPIO::PIN9);
-static GPIO::PIN SDA(GPIO::PORTA, GPIO::PIN10);
+static GPIO::PIN SCL(GPIO::Port::A, 9);
+static GPIO::PIN SDA(GPIO::Port::A, 10);
 // *** i2c controller ***
-static I2C::Controller i2c(I2C::I2C_1, 100000);
+static I2C::Controller i2c(IO::I2C_1, 100000);
 // *** PD controller ***
 static TPS65987::Controller PD(i2c);
 // *** IPC Mananger ***
@@ -70,8 +70,8 @@ static void initialize(void)
     ipc_manager.register_data(&ipc_interface);
 
     // Set up the i2c interface
-    i2c.assign_pin(SCL);
-    i2c.assign_pin(SDA);
+    SCL.set_alternate_function(IO::I2C_1);
+    SDA.set_alternate_function(IO::I2C_1);
     i2c.enable();
 
     // Initialize the charger interface

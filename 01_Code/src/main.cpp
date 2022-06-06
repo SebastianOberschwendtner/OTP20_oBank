@@ -36,15 +36,27 @@ OTOS::Kernel OS;
 // === Main ===
 int main(void)
 {
+    // Configure the SysTick timer to generate an interrupt every 1ms
+    Timer::SysTick_Configure();
+
     // Schedule Threads
-    OS.scheduleThread(&Task_System , OTOS::Check::StackSize<512>(), OTOS::PrioHigh);
-    OS.scheduleThread(&Task_Display, OTOS::Check::StackSize<512>(), OTOS::PrioNormal);
-    OS.scheduleThread(&Task_BMS    , OTOS::Check::StackSize<512>(), OTOS::PrioNormal);
-    OS.scheduleThread(&Task_PD     , OTOS::Check::StackSize<512>(), OTOS::PrioNormal);
+    OS.schedule_thread<512>(&Task_System , OTOS::Priority::High, 5);
+    OS.schedule_thread<512>(&Task_Display, OTOS::Priority::Normal);
+    OS.schedule_thread<512>(&Task_BMS    , OTOS::Priority::Normal);
+    OS.schedule_thread<512>(&Task_PD     , OTOS::Priority::Normal);
 
     // Start the task execution
     OS.start();
 
     // Never reached
     return 0;
+};
+
+/** 
+ * @brief Provide a Interrupt handler for the systick timer,
+ * which gets called every 1 ms.
+ */
+extern "C" void SysTick_Handler(void)
+{
+    OS.update_schedule();
 };

@@ -18,28 +18,17 @@
  *
  */
 
-#ifndef TASK_PD_H_
-#define TASK_PD_H_
+/**
+ * ==============================================================================
+ * This file is intended to configure the oBank and set user specific parameters.
+ * This file can be modified to fit your needs. 
+ * ==============================================================================
+ */
 
-// === Includes ===
-#include "task.h"
-#include "ipc.h"
-#include "pid.h"
-#include "drivers.h"
+#ifndef CONFIGURATION_H_
+#define CONFIGURATION_H_
 
-// === Task object ===
-class PD_Interface
-{
-    public:
-    // *** Constructor ***
-    PD_Interface() {};
-
-    // *** Methods ***
-    void    sleep(void);
-    void    wake(void);
-};
-
-// === Declarations ===
-void        Task_PD        (void);
+// === Define the version of the oBank ===
+constexpr char* __version__ = "v2.0.0";
 
 #endif
