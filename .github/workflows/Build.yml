@@ -40,4 +40,4 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
-      run: pio run -d 01_Code -e "oBank Release"
+      run: pio run -d 01_Code -e "oBank_Release"
