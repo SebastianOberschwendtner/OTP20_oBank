@@ -1,6 +1,6 @@
 [submodule "05_Wiki"]
 	path = 05_Wiki
-	url = https://github.com/knuffel-v2/OTP20_oBank.wiki.git
+	url = git@github.com:SebastianOberschwendtner/OTP20_oBank.wiki.git
 [submodule "01_Code/OTOS"]
 	path = 01_Code/OTOS
-	url = git@github.com:knuffel-v2/OTOS.git
+	url = git@github.com:SebastianOberschwendtner/OTOS.git
