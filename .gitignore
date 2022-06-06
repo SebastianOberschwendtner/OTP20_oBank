@@ -1,6 +1,7 @@
 # Ignore the raw cad files
 10_CAD
 *.FCStd1
+*.stl
 
 # Ignore secondary docmentation
 20_Invoices
