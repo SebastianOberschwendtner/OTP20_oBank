@@ -28,7 +28,8 @@
  */
 
 // === Includes ===
-#include "task_display.h"
+#include "tasks.h"
+#include "graphics.h"
 
 // === Global data within task ===
 // *** I/O pins ***
@@ -43,11 +44,11 @@ static Graphics::Buffer_BW<128, 32> GUI_Buffer;
 // *** Display canvas object ***
 static Graphics::Canvas_BW GUI(GUI_Buffer.data.data(), GUI_Buffer.width_px, GUI_Buffer.height_px);
 // *** IPC Mananger ***
-static IPC::Manager ipc_manager(IPC::Check::PID<PID::Display>());
+static IPC::Manager ipc_manager(IPC::Check::PID<IPC::Display>());
 // *** IPC Interface ***
-static Display_Interface ipc_interface;
+static IPC::Display_Interface ipc_interface;
 // *** IPC task references
-static BMS_Interface* task_bms;
+static IPC::BMS_Interface * task_bms;
 // *** String buffer ***
 static char line_string[24] = {0};
 
@@ -108,8 +109,8 @@ static void initialize(void)
 static void get_ipc(void)
 {
     // BMS Task
-    while (!IPC::Manager::get_data(PID::BMS)) OTOS::Task::yield(); 
-    task_bms = static_cast<BMS_Interface*>(IPC::Manager::get_data(PID::BMS).value());
+    while (!IPC::Manager::get_data(IPC::BMS)) OTOS::Task::yield(); 
+    task_bms = static_cast<IPC::BMS_Interface*>(IPC::Manager::get_data(IPC::BMS).value());
 };
 
 /**
@@ -135,15 +136,15 @@ static void draw_main_info(void)
 /**
  * @brief Set everything up for sleepmode
  */
-void Display_Interface::sleep(void)
+void IPC::Display_Interface::sleep(void)
 {
-    Display.off();
+    ::Display.off();
 };
 
 /**
  * @brief Set everything up after waking up
  */
-void Display_Interface::wake(void)
+void IPC::Display_Interface::wake(void)
 {
-    Display.on();
+    ::Display.on();
 };

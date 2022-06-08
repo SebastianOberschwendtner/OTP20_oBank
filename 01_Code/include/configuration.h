@@ -29,6 +29,6 @@
 #define CONFIGURATION_H_
 
 // === Define the version of the oBank ===
-constexpr char* __version__ = "v2.0.0";
+constexpr char* __version__ = "v2.1.0";
 
 #endif

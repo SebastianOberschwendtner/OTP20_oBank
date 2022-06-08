@@ -27,9 +27,6 @@
 #include "kernel.h"
 
 // === Tasks ===
-#include "task_system.h"
-#include "task_display.h"
-#include "task_bms.h"
-#include "task_pd.h"
+#include "tasks.h"
 
 #endif

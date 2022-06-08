@@ -28,7 +28,8 @@
  */
 
 // === Includes ===
-#include "task_system.h"
+#include "tasks.h"
+#include <string>
 
 // === Global data within task ===
 // *** I/O pins ***
@@ -37,9 +38,9 @@ static GPIO::PIN Led_Red(GPIO::Port::B, 1, GPIO::Mode::Output);
 static GPIO::PIN EN_5V(GPIO::Port::B, 6, GPIO::Mode::Output);
 static GPIO::PIN Button(GPIO::Port::A, 0, GPIO::Mode::Input);
 // *** IPC Interface to other tasks ***
-Display_Interface* task_display;
-BMS_Interface* task_bms;
-PD_Interface* task_pd;
+IPC::Display_Interface* task_display;
+IPC::BMS_Interface* task_bms;
+IPC::PD_Interface* task_pd;
 
 // === Functions ===
 static void initialize(void);
@@ -124,16 +125,16 @@ static void configure_sleep(void)
 static void get_ipc(void)
 {
     // Display Task
-    while (!IPC::Manager::get_data(PID::Display)) OTOS::Task::yield(); 
-    task_display = static_cast<Display_Interface*>(IPC::Manager::get_data(PID::Display).value());
+    while (!IPC::Manager::get_data(IPC::Display)) OTOS::Task::yield(); 
+    task_display = static_cast<IPC::Display_Interface*>(IPC::Manager::get_data(IPC::Display).value());
 
     // BMS Task
-    while (!IPC::Manager::get_data(PID::BMS)) OTOS::Task::yield(); 
-    task_bms = static_cast<BMS_Interface*>(IPC::Manager::get_data(PID::BMS).value());
+    while (!IPC::Manager::get_data(IPC::BMS)) OTOS::Task::yield(); 
+    task_bms = static_cast<IPC::BMS_Interface*>(IPC::Manager::get_data(IPC::BMS).value());
 
     // PD Task
-    while (!IPC::Manager::get_data(PID::PD)) OTOS::Task::yield(); 
-    task_pd = static_cast<PD_Interface*>(IPC::Manager::get_data(PID::PD).value());
+    while (!IPC::Manager::get_data(IPC::PD)) OTOS::Task::yield(); 
+    task_pd = static_cast<IPC::PD_Interface*>(IPC::Manager::get_data(IPC::PD).value());
 };
 
 /**

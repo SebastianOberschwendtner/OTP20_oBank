@@ -1,6 +1,6 @@
 /**
  * OTP20 - oBank
- * Copyright (c) 2021 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
+ * Copyright (c) 2022 Sebastian Oberschwendtner, sebastian.oberschwendtner@gmail.com
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,28 +18,20 @@
  *
  */
 
-#ifndef TASK_PD_H_
-#define TASK_PD_H_
+#ifndef TASKS_H_
+#define TASKS_H_
 
 // === Includes ===
-#include "task.h"
-#include "ipc.h"
-#include "pid.h"
+// => General includes which are needed by all tasks
 #include "drivers.h"
+#include "task.h"
+#include "interprocess.h"
 
-// === Task object ===
-class PD_Interface
-{
-    public:
-    // *** Constructor ***
-    PD_Interface() {};
-
-    // *** Methods ***
-    void    sleep(void);
-    void    wake(void);
-};
-
-// === Declarations ===
-void        Task_PD        (void);
+// === Tasks ===
+// => Add the tasks declaration here so the main.cpp can find them
+void Task_System(void);
+void Task_Display(void);
+void Task_BMS(void);
+void Task_PD(void);
 
 #endif

@@ -28,7 +28,7 @@
  */
 
 // === Includes ===
-#include "task_pd.h"
+#include "tasks.h"
 
 // === Global data within task ===
 // *** I/O pins ***
@@ -39,9 +39,9 @@ static I2C::Controller i2c(IO::I2C_1, 100000);
 // *** PD controller ***
 static TPS65987::Controller PD(i2c);
 // *** IPC Mananger ***
-static IPC::Manager ipc_manager(IPC::Check::PID<PID::PD>());
+static IPC::Manager ipc_manager(IPC::Check::PID<IPC::PD>());
 // *** IPC Interface ***
-static PD_Interface ipc_interface;
+static IPC::PD_Interface ipc_interface;
 
 // === Functions ===
 static void initialize(void);
@@ -84,13 +84,13 @@ static void initialize(void)
 /**
  * @brief Set everything up for sleepmode
  */
-void PD_Interface::sleep(void)
+void IPC::PD_Interface::sleep(void)
 {
 };
 
 /**
  * @brief Set everything up after waking up
  */
-void PD_Interface::wake(void)
+void IPC::PD_Interface::wake(void)
 {
 };

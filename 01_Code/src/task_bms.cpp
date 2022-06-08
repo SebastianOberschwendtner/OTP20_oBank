@@ -28,7 +28,7 @@
  */
 
 // === Includes ===
-#include "task_bms.h"
+#include "tasks.h"
 
 // === Global data within task ===
 // *** I/O pins ***
@@ -42,9 +42,9 @@ static BQ25700::Controller Charger(i2c);
 // *** BMS chip ***
 static MAX17205::Controller BMS(i2c);
 // *** IPC Mananger ***
-static IPC::Manager ipc_manager(IPC::Check::PID<PID::BMS>());
+static IPC::Manager ipc_manager(IPC::Check::PID<IPC::BMS>());
 // *** IPC Interface ***
-static BMS_Interface ipc_interface;
+static IPC::BMS_Interface ipc_interface;
 
 // Extern LED_RED PIN
 static GPIO::PIN Led_Red(GPIO::Port::B, 1, GPIO::Mode::Output);
@@ -119,7 +119,7 @@ extern "C" void EXTI2_3_IRQHandler(void)
 /**
  * @brief Set everything up for sleepmode
  */
-void BMS_Interface::sleep(void)
+void IPC::BMS_Interface::sleep(void)
 {
     // Disable the pullup to save power
     CHR_OK.set_pull(GPIO::Pull::No_Pull);
@@ -128,7 +128,7 @@ void BMS_Interface::sleep(void)
 /**
  * @brief Set everything up after waking up
  */
-void BMS_Interface::wake(void)
+void IPC::BMS_Interface::wake(void)
 {
     // Enable the pullup to sense whether an input is present
     CHR_OK.set_pull(GPIO::Pull::Pull_Up);
@@ -138,25 +138,25 @@ void BMS_Interface::wake(void)
  * @brief Get the latest voltage measurement of the battery
  * @return The battery voltage in [mV]
  */
-unsigned int BMS_Interface::get_battery_voltage(void) const
+unsigned int IPC::BMS_Interface::get_battery_voltage(void) const
 {
-    return BMS.get_battery_voltage();
+    return ::BMS.get_battery_voltage();
 };
 
 /**
  * @brief Get the latest current measurement of the battery
  * @return The battery current in [mA]
  */
-signed int BMS_Interface::get_battery_current(void) const
+signed int IPC::BMS_Interface::get_battery_current(void) const
 {
-    return BMS.get_battery_current();
+    return ::BMS.get_battery_current();
 };
 
 /**
  * @brief Get the current state of the charger.
  * @return The state of the charger. (Init, Idle, Charging, OTG, Error)
  */
-BQ25700::State BMS_Interface::get_charger_state(void) const
-{
-    return Charger.get_state();
-};
+// BQ25700::State BMS_Interface::get_charger_state(void) const
+// {
+//     return Charger.get_state();
+// };
