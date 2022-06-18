@@ -1,5 +1,16 @@
 # Changelog for OTP-20 oBank
-## [v2.0.0](https://github.com/SebastianOberschwendtner/OTP20_oBank/releases/tag/v2.0.0) *(2022-xx-xx)*
+## [v3.0.0](https://github.com/SebastianOberschwendtner/OTP20_oBank/releases/tag/v3.0.0) *(2022-xx-xx)*
+
+>Released by `SO`
+
+### Release Notes:
+- Adds **ETL** state machine to system task.
+
+### Fixed Issues:
+
+- n/a
+
+## [v2.0.0](https://github.com/SebastianOberschwendtner/OTP20_oBank/releases/tag/v2.0.0) *(2022-06-06)*
 
 >Released by `SO`
 

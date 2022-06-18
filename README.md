@@ -1,27 +1,27 @@
 ![Card](../../wiki/01_Logos/Header_oBank_v002.png)
 # OTP-20_oBank
 
-![tag](https://img.shields.io/github/v/tag/knuffel-v2/OTP20_oBank?color=green)
-![release](https://img.shields.io/github/v/release/knuffel-v2/OTP20_oBank?color=green)
-![issues](https://img.shields.io/github/issues-raw/knuffel-v2/OTP20_oBank)
-![bugs](https://img.shields.io/github/issues/knuffel-v2/OTP20_oBank/bug?color=red)
+![tag](https://img.shields.io/github/v/tag/SebastianOberschwendtner/OTP20_oBank?color=green)
+![release](https://img.shields.io/github/v/release/SebastianOberschwendtner/OTP20_oBank?color=green)
+![issues](https://img.shields.io/github/issues-raw/SebastianOberschwendtner/OTP20_oBank)
+![bugs](https://img.shields.io/github/issues/SebastianOberschwendtner/OTP20_oBank/bug?color=red)
 ![Status](https://img.shields.io/badge/Status-Development-yellowgreen)
 
 Open Source Power Bank with Power Delivery Capability.
 
 
->More information can be found in the *beautiful* [wiki](https://github.com/knuffel-v2/OTP20_oBank/wiki/home).
+>More information can be found in the *beautiful* [wiki](https://github.com/SebastianOberschwendtner/OTP20_oBank/wiki/home).
 
 >:construction: The **schematic** and **PCB** are designed with *CircuitMaker*. The project can be found [here](https://circuitmaker.com/Projects/Details/SebastianOberschwendtner/OTP-20oBank).
 
 ## Software Framework
 <!-- ![IDE1](https://img.shields.io/static/v1?label=IDE&message=Eclipse&color=yellowgreen) -->
-![GitHub Build Status](https://img.shields.io/github/workflow/status/knuffel-v2/OTP20_oBank/Build%20Firmware)
-![GitHub Test Status](https://img.shields.io/github/workflow/status/knuffel-v2/OTP20_oBank/Unit%20Test?label=test)
+![GitHub Build Status](https://img.shields.io/github/workflow/status/SebastianOberschwendtner/OTP20_oBank/Build%20Firmware)
+![GitHub Test Status](https://img.shields.io/github/workflow/status/SebastianOberschwendtner/OTP20_oBank/Unit%20Test?label=test)
 ![IDE2](https://img.shields.io/static/v1?label=IDE&message=VSCode&color=yellowgreen)
-![GitHub top language](https://img.shields.io/github/languages/top/knuffel-v2/OTP20_oBank?color=brightgreen)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/knuffel-v2/OTP20_oBank)
-![GitHub](https://img.shields.io/github/license/knuffel-v2/OTP20_oBank)
+![GitHub top language](https://img.shields.io/github/languages/top/SebastianOberschwendtner/OTP20_oBank?color=brightgreen)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/SebastianOberschwendtner/OTP20_oBank)
+![GitHub](https://img.shields.io/github/license/SebastianOberschwendtner/OTP20_oBank)
 
 ## Branches
 |Name|Status|Description|

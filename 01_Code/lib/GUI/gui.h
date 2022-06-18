@@ -18,21 +18,18 @@
  *
  */
 
-#ifndef TASKS_H_
-#define TASKS_H_
+#ifndef GUI_H_
+#define GUI_H_
 
 // === Includes ===
-// => General includes which are needed by all tasks
-#include "drivers.h"
-#include "task.h"
-#include "interprocess.h"
-#include "configuration.h"
+#include "graphics.h"
 
-// === Tasks ===
-// => Add the tasks declaration here so the main.cpp can find them
-void Task_System(void);
-void Task_Display(void);
-void Task_BMS(void);
-void Task_PD(void);
-
+namespace GUI
+{
+    // === Functions ===
+    unsigned char* get_data_pointer(void);
+    void initialize_canvas(void);
+    void draw_main_info(unsigned int voltage, signed int current);
+    void draw_state_info(bool output_enabled, bool is_charging);
+};
 #endif

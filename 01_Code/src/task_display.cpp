@@ -29,7 +29,7 @@
 
 // === Includes ===
 #include "tasks.h"
-#include "graphics.h"
+#include "gui.h"
 
 // === Global data within task ===
 // *** I/O pins ***
@@ -39,23 +39,18 @@ static GPIO::PIN SDA(GPIO::Port::B, 4);
 static I2C::Controller i2c(IO::I2C_3, 100000);
 // *** Display controller ***
 static SSD1306::Controller Display(i2c);
-// *** Display buffer ***
-static Graphics::Buffer_BW<128, 32> GUI_Buffer;
-// *** Display canvas object ***
-static Graphics::Canvas_BW GUI(GUI_Buffer.data.data(), GUI_Buffer.width_px, GUI_Buffer.height_px);
 // *** IPC Mananger ***
 static IPC::Manager ipc_manager(IPC::Check::PID<IPC::Display>());
 // *** IPC Interface ***
 static IPC::Display_Interface ipc_interface;
 // *** IPC task references
-static IPC::BMS_Interface * task_bms;
-// *** String buffer ***
-static char line_string[24] = {0};
+static IPC::BMS_Interface *task_bms;
+// *** Current page ***
+static unsigned char page = 0;
 
 // === Functions ===
 static void initialize(void);
 static void get_ipc(void);
-static void draw_main_info(void);
 
 /**
  * @brief Main task for handling the display interface
@@ -69,10 +64,25 @@ void Task_Display(void)
     get_ipc();
 
     // Start looping
-    while(1)
+    while (1)
     {
-        draw_main_info();
-        Display.draw(&GUI_Buffer.data[0]);
+        // switch page
+        switch (page)
+        {
+        case 0:
+            // *** Page 0 ***
+            GUI::draw_main_info(
+                task_bms->get_battery_voltage(),
+                task_bms->get_battery_current());
+            break;
+        case 1:
+            // *** Page 1 ***
+            GUI::draw_state_info(false, false);
+            break;
+        default:
+            break;
+        };
+        Display.draw(GUI::get_data_pointer());
         OTOS::Task::yield();
     };
 };
@@ -91,14 +101,9 @@ static void initialize(void)
     i2c.enable();
 
     // Initialize the display
+    GUI::initialize_canvas();
     Display.initialize();
 
-    // Empty the canvas
-    GUI.fill(Graphics::Black);
-
-    // Write the first content in canvas    
-    GUI.set_fontsize(Font::Size::Normal);
-    GUI.add_string("U: \nI: ");
     Display.on();
     OTOS::Task::yield();
 };
@@ -109,32 +114,15 @@ static void initialize(void)
 static void get_ipc(void)
 {
     // BMS Task
-    while (!IPC::Manager::get_data(IPC::BMS)) OTOS::Task::yield(); 
-    task_bms = static_cast<IPC::BMS_Interface*>(IPC::Manager::get_data(IPC::BMS).value());
-};
-
-/**
- * @brief Draw the main information on the display.
- */
-static void draw_main_info(void)
-{
-    // Draw the voltage information
-    unsigned int voltage = task_bms->get_battery_voltage();
-    GUI.set_cursor(2,0);
-    std::sprintf(line_string, " %d.%02d  V", voltage/1000, (voltage/10)%100);
-    GUI.add_string(line_string);
-
-    // Draw the current information
-    signed int current = task_bms->get_battery_current();
-    GUI.set_cursor(2,1);
-    std::sprintf(line_string, "%+5d mA", current);
-    GUI.add_string(line_string);
+    while (!IPC::Manager::get_data(IPC::BMS))
+        OTOS::Task::yield();
+    task_bms = static_cast<IPC::BMS_Interface *>(IPC::Manager::get_data(IPC::BMS).value());
 };
 
 // === IPC interface ===
 
 /**
- * @brief Set everything up for sleepmode
+ * @brief Set everything up for sleep mode
  */
 void IPC::Display_Interface::sleep(void)
 {
@@ -147,4 +135,14 @@ void IPC::Display_Interface::sleep(void)
 void IPC::Display_Interface::wake(void)
 {
     ::Display.on();
+};
+
+/**
+ * @brief Increase the display page
+ */
+void IPC::Display_Interface::next_page(void)
+{
+    page++;
+    if (page > 1)
+        page = 0;
 };

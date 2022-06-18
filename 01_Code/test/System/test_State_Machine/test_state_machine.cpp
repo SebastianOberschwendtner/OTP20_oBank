@@ -31,12 +31,17 @@
 #include "unity.h"
 #include "state_machine.h"
 #include "mock.h"
+using namespace System;
 
 // === Fixtures ===
 
 // Provide the implementation of the actions
+void Actions::Initialize(void) { return; };
 void Actions::Sleep(void) { return; };
 void Actions::Wake_Up(void) { return; };
+void Actions::Handle_User_Input(void) { return; };
+void Actions::Reset_Timeouts(void) { return; };
+bool System::Actions::not_charging(void) { return true; };
 
 // *** Setup and Teardown functions ***
 void setUp(void)
@@ -62,33 +67,54 @@ etl::state_chart_ct<
 
 void test_available_states(void)
 {
+    TEST_ASSERT_EQUAL(State_ID::Initialize, State_ID::Initialize);
     TEST_ASSERT_EQUAL(State_ID::Info_Idle, State_ID::Info_Idle);
     TEST_ASSERT_EQUAL(State_ID::Sleep, State_ID::Sleep);
+    TEST_ASSERT_EQUAL(State_ID::Wait_Input, State_ID::Wait_Input);
 };
 
 void test_available_events(void)
 {
     TEST_ASSERT_EQUAL(Event_ID::User_Timeout, Event_ID::User_Timeout);
+    TEST_ASSERT_EQUAL(Event_ID::Input_Timeout, Event_ID::Input_Timeout);
     TEST_ASSERT_EQUAL(Event_ID::Button_Pressed, Event_ID::Button_Pressed);
+    TEST_ASSERT_EQUAL(Event_ID::Always, Event_ID::Always);
 };
 
 void test_state_table(void)
 {
-    TEST_ASSERT_EQUAL(State_ID::Info_Idle, StateTable[0].state_id);
-    TEST_ASSERT_EQUAL(State_ID::Sleep, StateTable[1].state_id);
+    TEST_ASSERT_EQUAL(State_ID::Initialize, StateTable[0].state_id);
+    TEST_ASSERT_EQUAL(State_ID::Info_Idle, StateTable[1].state_id);
+    TEST_ASSERT_EQUAL(State_ID::Sleep, StateTable[2].state_id);
+    TEST_ASSERT_EQUAL(State_ID::Wait_Input, StateTable[3].state_id);
 };
 
 void test_transition_table(void)
 {
+    // Transition Initialize -> Info_Idle
+    TEST_ASSERT_EQUAL(Event_ID::Always, TransitionTable[0].event_id);
+    TEST_ASSERT_EQUAL(State_ID::Initialize, TransitionTable[0].current_state_id);
+    TEST_ASSERT_EQUAL(State_ID::Info_Idle, TransitionTable[0].next_state_id);
+
     // Transition: Info_Idle -> Sleep
-    TEST_ASSERT_EQUAL(Event_ID::User_Timeout, TransitionTable[0].event_id);
-    TEST_ASSERT_EQUAL(State_ID::Info_Idle, TransitionTable[0].current_state_id);
-    TEST_ASSERT_EQUAL(State_ID::Sleep, TransitionTable[0].next_state_id);
+    TEST_ASSERT_EQUAL(Event_ID::User_Timeout, TransitionTable[1].event_id);
+    TEST_ASSERT_EQUAL(State_ID::Info_Idle, TransitionTable[1].current_state_id);
+    TEST_ASSERT_EQUAL(State_ID::Sleep, TransitionTable[1].next_state_id);
 
     // Transition: Sleep -> Info_Idle
-    TEST_ASSERT_EQUAL(Event_ID::Button_Pressed, TransitionTable[1].event_id);
-    TEST_ASSERT_EQUAL(State_ID::Sleep, TransitionTable[1].current_state_id);
-    TEST_ASSERT_EQUAL(State_ID::Info_Idle, TransitionTable[1].next_state_id);
+    TEST_ASSERT_EQUAL(Event_ID::Always, TransitionTable[2].event_id);
+    TEST_ASSERT_EQUAL(State_ID::Sleep, TransitionTable[2].current_state_id);
+    TEST_ASSERT_EQUAL(State_ID::Info_Idle, TransitionTable[2].next_state_id);
+
+    // Transition: Info_Idle -> Wait_Input
+    TEST_ASSERT_EQUAL(Event_ID::Button_Pressed, TransitionTable[3].event_id);
+    TEST_ASSERT_EQUAL(State_ID::Info_Idle, TransitionTable[3].current_state_id);
+    TEST_ASSERT_EQUAL(State_ID::Wait_Input, TransitionTable[3].next_state_id);
+
+    // Transition: Wait_Input -> Info_Idle, with timeout
+    TEST_ASSERT_EQUAL(Event_ID::Input_Timeout, TransitionTable[4].event_id);
+    TEST_ASSERT_EQUAL(State_ID::Wait_Input, TransitionTable[4].current_state_id);
+    TEST_ASSERT_EQUAL(State_ID::Info_Idle, TransitionTable[4].next_state_id);
 };
 
 // => The following test is not needed since it would test the library code 

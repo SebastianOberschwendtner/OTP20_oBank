@@ -45,6 +45,7 @@ namespace IPC
         void wake(void);
         unsigned int get_battery_voltage(void) const;
         signed int get_battery_current(void) const;
+        bool is_charging(void) const;
     };
 
     // ===  Data interface to the PD task ===
@@ -59,6 +60,7 @@ namespace IPC
     {
         void sleep(void);
         void wake(void);
+        void next_page(void);
     };
 };
 #endif

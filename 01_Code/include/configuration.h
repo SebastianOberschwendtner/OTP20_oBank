@@ -27,8 +27,39 @@
 
 #ifndef CONFIGURATION_H_
 #define CONFIGURATION_H_
+#include <chrono>
+using namespace std::chrono_literals;
 
-// === Define the version of the oBank ===
-constexpr char* __version__ = "v2.1.0";
+namespace detail
+{
+    // === Define the version of the oBank ===
+    constexpr char __version__[] = "v2.1.0";
+};
+
+namespace User
+{
+    // === Timeouts ===
+    namespace Timeout
+    {
+        // === Timeout for the user interface ===
+        /**
+         * @brief The timeout for the user interface in milli seconds.
+         * @fixed: Add strong time type. 
+         */
+        constexpr auto Display = 10s;
+
+        /**
+         * @brief The timeout for detecting a button hold.
+         */
+        constexpr auto Button_Hold = 250ms;
+    };
+
+    // === Power Parameters ===
+    namespace Power
+    {
+        // === Charging Parameters ===
+        constexpr unsigned int Max_Charge_Current = 500; // [mA]
+    };
+};
 
 #endif

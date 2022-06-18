@@ -59,4 +59,5 @@ int main(void)
 extern "C" void SysTick_Handler(void)
 {
     OS.update_schedule();
+    OS.count_time_ms();
 };

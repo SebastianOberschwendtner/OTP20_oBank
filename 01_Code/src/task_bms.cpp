@@ -71,7 +71,7 @@ void Task_BMS(void)
         if (CHR_OK.get_state())
         {
             // Input power is present, set charge current
-            if(Charger.set_charge_current(1000))
+            if(Charger.set_charge_current(User::Power::Max_Charge_Current))
                 Led_Red.set_state(true);
             else
                 Led_Red.set_state(false);
@@ -79,7 +79,7 @@ void Task_BMS(void)
         else
         {
             // Turn off red LED
-        Led_Red.set_state(false);
+            Led_Red.set_state(false);
         }
 
         OTOS::Task::yield();
@@ -153,10 +153,11 @@ signed int IPC::BMS_Interface::get_battery_current(void) const
 };
 
 /**
- * @brief Get the current state of the charger.
- * @return The state of the charger. (Init, Idle, Charging, OTG, Error)
+ * @brief Get the current state of the charger by checking whether
+ * the 5V input power is present.
+ * @return Returns true if the charger is connected, false otherwise.
  */
-// BQ25700::State BMS_Interface::get_charger_state(void) const
-// {
-//     return Charger.get_state();
-// };
+bool IPC::BMS_Interface::is_charging(void) const
+{
+    return ::CHR_OK.get_state();
+};
