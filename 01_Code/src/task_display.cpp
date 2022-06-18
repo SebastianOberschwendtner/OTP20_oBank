@@ -35,6 +35,7 @@
 // *** I/O pins ***
 static GPIO::PIN SCL(GPIO::Port::A, 8);
 static GPIO::PIN SDA(GPIO::Port::B, 4);
+static GPIO::PIN EN_5V{GPIO::Port::B, 6, GPIO::Mode::Output};
 // *** i2c controller ***
 static I2C::Controller i2c(IO::I2C_3, 100000);
 // *** Display controller ***
@@ -45,8 +46,18 @@ static IPC::Manager ipc_manager(IPC::Check::PID<IPC::Display>());
 static IPC::Display_Interface ipc_interface;
 // *** IPC task references
 static IPC::BMS_Interface *task_bms;
-// *** Current page ***
-static unsigned char page = 0;
+
+// *** GUI Actions and Events ***
+static GUI::Actions actions;
+static GUI::Events events;
+
+// *** The GUI State Machine ***
+static etl::state_chart_ct<
+    GUI::Actions, actions,
+    GUI::TransitionTable, std::size(GUI::TransitionTable),
+    GUI::StateTable, std::size(GUI::StateTable),
+    GUI::State_ID::Main_Info>
+    state_machine;
 
 // === Functions ===
 static void initialize(void);
@@ -63,25 +74,17 @@ void Task_Display(void)
     // Get IPC references
     get_ipc();
 
+    // Start the state machine
+    state_machine.start();
+
     // Start looping
     while (1)
     {
-        // switch page
-        switch (page)
-        {
-        case 0:
-            // *** Page 0 ***
-            GUI::draw_main_info(
-                task_bms->get_battery_voltage(),
-                task_bms->get_battery_current());
-            break;
-        case 1:
-            // *** Page 1 ***
-            GUI::draw_state_info(false, false);
-            break;
-        default:
-            break;
-        };
+        // Handle the state machine
+        auto event = events.get_event();
+        state_machine.process_event(event);
+
+        // Send the display buffer to the display
         Display.draw(GUI::get_data_pointer());
         OTOS::Task::yield();
     };
@@ -142,7 +145,38 @@ void IPC::Display_Interface::wake(void)
  */
 void IPC::Display_Interface::next_page(void)
 {
-    page++;
-    if (page > 1)
-        page = 0;
+    // Trigger the next page event
+    events.next_page.trigger();
+};
+
+// === GUI Actions ===
+
+/**
+ * @brief Draw the main info page
+ */
+void GUI::Actions::Draw_Main_Info(void)
+{
+    // Draw the main info
+    GUI::draw_main_info(
+        task_bms->get_battery_voltage(),
+        task_bms->get_battery_current()
+    );
+};
+
+/**
+ * @brief Draw the status info page
+ */
+void GUI::Actions::Draw_Status_Info(void)
+{
+    GUI::draw_state_info(
+        EN_5V.get_state(), 
+        task_bms->is_charging());
+};
+
+/**
+ * @brief Clear the display canvas
+ */
+void GUI::Actions::Clear_Buffer(void)
+{
+    // GUI::clear_canvas();
 };

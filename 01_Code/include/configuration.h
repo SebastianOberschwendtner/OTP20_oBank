@@ -58,7 +58,7 @@ namespace User
     namespace Power
     {
         // === Charging Parameters ===
-        constexpr unsigned int Max_Charge_Current = 500; // [mA]
+        constexpr unsigned int Max_Charge_Current = 1000; // [mA]
     };
 };
 

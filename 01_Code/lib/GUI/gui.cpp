@@ -85,21 +85,36 @@ void GUI::draw_main_info(
     canvas.add_string(line_string);
 };
 
+/**
+ * @brief Draw the status page on the canvas.
+ * 
+ * @param output_enabled Whether the output is enabled or not.
+ * @param is_charging Whether the battery is charging or not.
+ */
 void GUI::draw_state_info(
     bool output_enabled,
-    bool is_chargin)
+    bool is_charging)
 {
     // Draw the output enabled information
     canvas.set_cursor(0, 0);
     if (output_enabled)
-        canvas.add_string("5V enabled");
+        canvas.add_string("5V:    ON ");
     else
-        canvas.add_string("5V disabled");
+        canvas.add_string("5V:    OFF");
 
     // Draw the charging information
     canvas.set_cursor(0, 1);
-    if (is_chargin)
-        canvas.add_string("Charging");
+    if (is_charging)
+        canvas.add_string("Input: ON ");
     else
-        canvas.add_string("Not Charging");
+        canvas.add_string("Input: OFF");
+};
+
+/**
+ * @brief Clear the canvas for changing the page.
+ */
+void GUI::clear_canvas(void)
+{
+    // Empty the canvas
+    GUI_Buffer.data.fill(0);
 };

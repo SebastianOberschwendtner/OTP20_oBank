@@ -18,41 +18,27 @@
  *
  */
 
-#ifndef GUI_H_
-#define GUI_H_
+#ifndef GUI_EVENTS_H_
+#define GUI_EVENTS_H_
 
 // === Includes ===
-#include "graphics.h"
 #include "gui_state_machine.h"
-#include "gui_events.h"
 
-namespace GUI
+namespace Event
 {
+
     // === Events ===
-    class Events
+    class Next_Page
     {
     private:
+        bool event_active{false};
 
     public:
-        Event::Next_Page next_page;
 
         // *** Methods ***
-        etl::state_chart_traits::event_id_t get_event(void)
-        {
-            // Check for triggered events and return their ID
-            if (next_page.is_triggered())
-                return GUI::Event_ID::Next_Page;
+        bool is_triggered(void);
+        void trigger(void);
 
-            // No event triggered
-            return GUI::Event_ID::Always;
-        }
     };
-
-    // === Functions ===
-    unsigned char* get_data_pointer(void);
-    void initialize_canvas(void);
-    void draw_main_info(unsigned int voltage, signed int current);
-    void draw_state_info(bool output_enabled, bool is_charging);
-    void clear_canvas(void);
 };
 #endif

@@ -74,8 +74,7 @@ void Task_System(void)
     {
         // Handle the state machine
         auto event = events.get_event(std::chrono::milliseconds(OTOS::get_time_ms()));
-        if (event)
-            state_machine.process_event(event.value());
+        state_machine.process_event(event);
 
         // Indicate the 5V pin state with the green led
         Led_Green.set_state(EN_5V.get_state());

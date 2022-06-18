@@ -16,16 +16,24 @@ namespace System
     public:
         // delete the default constructor
         Events() = delete;
+
+        /**
+         * @brief Construct a new Events object
+         * 
+         * @param timeout The timeout in milliseconds to go to sleep.
+         * @param holdtime The timeout in milliseconds the button has to be pressed to trigger event.
+         * @param input_button The button to be used for input.
+         */
         Events(std::chrono::milliseconds timeout,
-               std::chrono::milliseconds double_click,
+               std::chrono::milliseconds holdtime,
                GPIO::PIN &input_button)
             : user_timeout{timeout}
-            , input_timeout{double_click}
+            , input_timeout{holdtime}
             , user_button{input_button, GPIO::Edge::Rising}
             {};
 
         // Process all events
-        etl::optional<etl::state_chart_traits::event_id_t> get_event(std::chrono::milliseconds current_time)
+        etl::state_chart_traits::event_id_t get_event(std::chrono::milliseconds current_time)
         {
             // return the event ID when it is triggered
             if (user_timeout.is_triggered(current_time))

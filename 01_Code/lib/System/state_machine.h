@@ -65,6 +65,8 @@ namespace System
         void Wake_Up(void);
         void Handle_User_Input(void);
         void Reset_Timeouts(void);
+
+        // *** Guards ***
         bool not_charging(void);
     };
 

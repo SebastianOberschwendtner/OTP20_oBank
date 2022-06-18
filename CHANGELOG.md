@@ -5,6 +5,7 @@
 
 ### Release Notes:
 - Adds **ETL** state machine to system task.
+- Adds **ETL** state machine to display task.
 
 ### Fixed Issues:
 
