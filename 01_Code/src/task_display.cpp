@@ -174,6 +174,17 @@ void GUI::Actions::Draw_Status_Info(void)
 };
 
 /**
+ * @brief Draw the cell info page
+ */
+void GUI::Actions::Draw_Cell_Info(void)
+{
+    GUI::draw_cell_info(
+        task_bms->get_cell_voltage(1),
+        task_bms->get_cell_voltage(2)
+    );
+};
+
+/**
  * @brief Clear the display canvas
  */
 void GUI::Actions::Clear_Buffer(void)

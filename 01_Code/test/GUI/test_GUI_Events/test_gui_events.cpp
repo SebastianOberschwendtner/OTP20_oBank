@@ -37,6 +37,7 @@
 // Provide the implementation of the actions
 void GUI::Actions::Draw_Main_Info(void) { return; };
 void GUI::Actions::Draw_Status_Info(void) { return; };
+void GUI::Actions::Draw_Cell_Info(void) { return; };
 void GUI::Actions::Clear_Buffer(void) { return; };
 
 // *** Setup and Teardown functions ***

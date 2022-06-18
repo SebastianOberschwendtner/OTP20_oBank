@@ -45,6 +45,7 @@ namespace IPC
         void wake(void);
         unsigned int get_battery_voltage(void) const;
         signed int get_battery_current(void) const;
+        unsigned int get_cell_voltage(unsigned char cell) const;
         bool is_charging(void) const;
     };
 

@@ -53,6 +53,7 @@ namespace GUI
     void initialize_canvas(void);
     void draw_main_info(unsigned int voltage, signed int current);
     void draw_state_info(bool output_enabled, bool is_charging);
+    void draw_cell_info(unsigned int cell_1, unsigned int cell_2);
     void clear_canvas(void);
 };
 #endif

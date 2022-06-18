@@ -37,6 +37,7 @@
 // Provide the implementation of the actions
 void GUI::Actions::Draw_Main_Info(void) { return; };
 void GUI::Actions::Draw_Status_Info(void) { return; };
+void GUI::Actions::Draw_Cell_Info(void) { return; };
 void GUI::Actions::Clear_Buffer(void) { return; };
 
 // *** Setup and Teardown functions ***
@@ -58,6 +59,7 @@ void test_available_states(void)
 {
     TEST_ASSERT_EQUAL(GUI::State_ID::Main_Info, GUI::State_ID::Main_Info);
     TEST_ASSERT_EQUAL(GUI::State_ID::Status_Info, GUI::State_ID::Status_Info);
+    TEST_ASSERT_EQUAL(GUI::State_ID::Cell_Info, GUI::State_ID::Cell_Info);
 };
 
 void test_available_events(void)
@@ -70,6 +72,7 @@ void test_state_table(void)
 {
     TEST_ASSERT_EQUAL(GUI::State_ID::Main_Info, GUI::StateTable[0].state_id);
     TEST_ASSERT_EQUAL(GUI::State_ID::Status_Info, GUI::StateTable[1].state_id);
+    TEST_ASSERT_EQUAL(GUI::State_ID::Cell_Info, GUI::StateTable[2].state_id);
 };
 
 void test_transition_table(void)
@@ -89,10 +92,20 @@ void test_transition_table(void)
     TEST_ASSERT_EQUAL(GUI::State_ID::Status_Info, GUI::TransitionTable[2].current_state_id);
     TEST_ASSERT_EQUAL(GUI::State_ID::Status_Info, GUI::TransitionTable[2].next_state_id);
 
-    // Draw_Status_Info -> Draw_Main_Info
+    // Draw_Status_Info -> Draw_Cell_Info
     TEST_ASSERT_EQUAL(GUI::Event_ID::Next_Page, GUI::TransitionTable[3].event_id);
     TEST_ASSERT_EQUAL(GUI::State_ID::Status_Info, GUI::TransitionTable[3].current_state_id);
-    TEST_ASSERT_EQUAL(GUI::State_ID::Main_Info, GUI::TransitionTable[3].next_state_id);
+    TEST_ASSERT_EQUAL(GUI::State_ID::Cell_Info, GUI::TransitionTable[3].next_state_id);
+
+    // Draw_Cell_Info -> Draw_Cell_Info
+    TEST_ASSERT_EQUAL(GUI::Event_ID::Always, GUI::TransitionTable[4].event_id);
+    TEST_ASSERT_EQUAL(GUI::State_ID::Cell_Info, GUI::TransitionTable[4].current_state_id);
+    TEST_ASSERT_EQUAL(GUI::State_ID::Cell_Info, GUI::TransitionTable[4].next_state_id);
+
+    // Draw_Cell_Info -> Draw_Main_Info
+    TEST_ASSERT_EQUAL(GUI::Event_ID::Next_Page, GUI::TransitionTable[5].event_id);
+    TEST_ASSERT_EQUAL(GUI::State_ID::Cell_Info, GUI::TransitionTable[5].current_state_id);
+    TEST_ASSERT_EQUAL(GUI::State_ID::Main_Info, GUI::TransitionTable[5].next_state_id);
 };
 
 // === Main ===

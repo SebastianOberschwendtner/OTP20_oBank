@@ -66,6 +66,7 @@ void Task_BMS(void)
         // Read battery data
         BMS.read_battery_current_avg();
         BMS.read_battery_voltage();
+        BMS.read_cell_voltage();
 
         // Manage charging
         if (CHR_OK.get_state())
@@ -150,6 +151,16 @@ unsigned int IPC::BMS_Interface::get_battery_voltage(void) const
 signed int IPC::BMS_Interface::get_battery_current(void) const
 {
     return ::BMS.get_battery_current();
+};
+
+/**
+ * @brief Get the latest cell voltage measurement of the battery.
+ * @param cell The cell number to get the voltage for (1 or 2).
+ * @return The battery current in [mA]
+ */
+unsigned int IPC::BMS_Interface::get_cell_voltage(unsigned char cell) const
+{
+    return ::BMS.get_cell_voltage(cell);
 };
 
 /**

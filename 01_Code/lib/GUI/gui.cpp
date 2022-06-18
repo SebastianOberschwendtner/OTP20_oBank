@@ -87,7 +87,7 @@ void GUI::draw_main_info(
 
 /**
  * @brief Draw the status page on the canvas.
- * 
+ *
  * @param output_enabled Whether the output is enabled or not.
  * @param is_charging Whether the battery is charging or not.
  */
@@ -108,6 +108,27 @@ void GUI::draw_state_info(
         canvas.add_string("Input: ON ");
     else
         canvas.add_string("Input: OFF");
+};
+
+/**
+ * @brief Draw the cell info page on the canvas.
+ * 
+ * @param cell_1 The measured voltage of cell 1 in [mV]
+ * @param cell_2 The measured voltage of cell 2 in [mV]
+ */
+void GUI::draw_cell_info(
+    unsigned int cell_1,
+    unsigned int cell_2)
+{
+    // Draw first cell voltage
+    canvas.set_cursor(0, 0);
+    std::sprintf(line_string, "C1: %d.%03dV", cell_1 / 1000, cell_1 - ( cell_1/1000)*1000);
+    canvas.add_string(line_string);
+
+    // Draw second cell voltage
+    canvas.set_cursor(0, 1);
+    std::sprintf(line_string, "C2: %d.%03dV", cell_2 / 1000, cell_2 - ( cell_2/1000)*1000);
+    canvas.add_string(line_string);
 };
 
 /**
