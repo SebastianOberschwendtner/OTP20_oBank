@@ -4,8 +4,12 @@
 >Released by `SO`
 
 ### Release Notes:
+#### :bookmark: `v2.1.0`
 - Adds **ETL** state machine to system task.
 - Adds **ETL** state machine to display task.
+- Adds further BMS parameters to the GUI.
+#### :bookmark: `v2.2.0`
+-
 
 ### Fixed Issues:
 

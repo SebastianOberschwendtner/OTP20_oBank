@@ -67,6 +67,10 @@ void Task_BMS(void)
         BMS.read_battery_current_avg();
         BMS.read_battery_voltage();
         BMS.read_cell_voltage();
+        BMS.read_remaining_capacity();
+        BMS.read_soc();
+        BMS.read_TTE();
+        BMS.read_TTF();
 
         // Manage charging
         if (CHR_OK.get_state())
@@ -161,6 +165,46 @@ signed int IPC::BMS_Interface::get_battery_current(void) const
 unsigned int IPC::BMS_Interface::get_cell_voltage(unsigned char cell) const
 {
     return ::BMS.get_cell_voltage(cell);
+};
+
+/**
+ * @brief Get the remaining battery capacity as reported by the BMS chip.
+ * 
+ * @return The remaining battery capacity in [mAh]
+ */
+unsigned int IPC::BMS_Interface::get_remaining_capacity(void) const
+{
+    return ::BMS.get_remaining_capacity();
+};
+
+/**
+ * @brief Get the SOC as reported by the BMS chip.
+ * 
+ * @return The SOC in 0.1[%].
+ */
+unsigned int IPC::BMS_Interface::get_soc(void) const
+{
+    return ::BMS.get_SOC();
+};
+
+/**
+ * @brief Get the estimated time to empty as reported by the BMS chip.
+ * 
+ * @return  The time to empty in [s].
+ */
+unsigned int IPC::BMS_Interface::get_time2empty(void) const
+{
+    return ::BMS.get_TTE();
+};
+
+/**
+ * @brief Get the estimated time to full as reported by the BMS chip.
+ * 
+ * @return  The time to full in [s].
+ */
+unsigned int IPC::BMS_Interface::get_time2full(void) const
+{
+    return ::BMS.get_TTF();
 };
 
 /**

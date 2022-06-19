@@ -71,8 +71,8 @@ void GUI::initialize_canvas(void)
  * @param current The measured battery current.
  */
 void GUI::draw_main_info(
-    unsigned int voltage,
-    signed int current)
+    const unsigned int voltage,
+    const signed int current)
 {
     // Draw the voltage information
     canvas.set_cursor(0, 0);
@@ -92,8 +92,8 @@ void GUI::draw_main_info(
  * @param is_charging Whether the battery is charging or not.
  */
 void GUI::draw_state_info(
-    bool output_enabled,
-    bool is_charging)
+    const bool output_enabled,
+    const bool is_charging)
 {
     // Draw the output enabled information
     canvas.set_cursor(0, 0);
@@ -117,8 +117,8 @@ void GUI::draw_state_info(
  * @param cell_2 The measured voltage of cell 2 in [mV]
  */
 void GUI::draw_cell_info(
-    unsigned int cell_1,
-    unsigned int cell_2)
+    const unsigned int cell_1,
+    const unsigned int cell_2)
 {
     // Draw first cell voltage
     canvas.set_cursor(0, 0);
@@ -128,6 +128,46 @@ void GUI::draw_cell_info(
     // Draw second cell voltage
     canvas.set_cursor(0, 1);
     std::sprintf(line_string, "C2: %d.%03dV", cell_2 / 1000, cell_2 - ( cell_2/1000)*1000);
+    canvas.add_string(line_string);
+};
+
+/**
+ * @brief Draw the state of charge information on the canvas.
+ * 
+ * @param capacity The remaining capacity of the battery in [mAh].
+ * @param soc The state of charge of the battery in [%].
+ * @todo Adjust the formatting of the capacity and soc.
+ */
+void GUI::draw_soc_info(const unsigned int capacity, const unsigned int soc)
+{
+    // Draw the capacity information
+    canvas.set_cursor(0, 0);
+    std::sprintf(line_string, "Cap:%2d.%dAh", capacity / 1000, (capacity % 1000)/100);
+    canvas.add_string(line_string);
+
+    // Draw the SOC information
+    canvas.set_cursor(0, 1);
+    std::sprintf(line_string, "SOC: %3d %%", soc);
+    canvas.add_string(line_string);
+};
+
+/**
+ * @brief Draw the time information on the canvas.
+ * 
+ * @param time2empty The time until the battery is empty in [s].
+ * @param time2full The time until the battery is full in [s].
+ * @todo Adjust the formatting of the time.
+ */
+void GUI::draw_time_info(const unsigned int time2empty, const unsigned int time2full)
+{
+    // Draw the time to empty information
+    canvas.set_cursor(0, 0);
+    std::sprintf(line_string, "TTE:%3d.%dh", time2empty / 3600, (time2empty % 3600) / 360);
+    canvas.add_string(line_string);
+
+    // Draw the time to full information
+    canvas.set_cursor(0, 1);
+    std::sprintf(line_string, "TTF:%3d.%dh", time2full / 3600, (time2full % 3600) / 360);
     canvas.add_string(line_string);
 };
 

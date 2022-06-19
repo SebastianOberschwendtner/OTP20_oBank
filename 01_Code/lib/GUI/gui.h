@@ -51,9 +51,11 @@ namespace GUI
     // === Functions ===
     unsigned char* get_data_pointer(void);
     void initialize_canvas(void);
-    void draw_main_info(unsigned int voltage, signed int current);
-    void draw_state_info(bool output_enabled, bool is_charging);
-    void draw_cell_info(unsigned int cell_1, unsigned int cell_2);
+    void draw_main_info(const unsigned int voltage, const signed int current);
+    void draw_state_info(const bool output_enabled, const bool is_charging);
+    void draw_cell_info(const unsigned int cell_1, const unsigned int cell_2);
+    void draw_soc_info(const unsigned int capacity, const unsigned int soc);
+    void draw_time_info(const unsigned int time2empty, const unsigned int time2full);
     void clear_canvas(void);
 };
 #endif

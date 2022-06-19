@@ -185,6 +185,28 @@ void GUI::Actions::Draw_Cell_Info(void)
 };
 
 /**
+ * @brief Draw the SOC info.
+ */
+void GUI::Actions::Draw_SOC_Info(void)
+{
+    GUI::draw_soc_info(
+        task_bms->get_remaining_capacity(),
+        task_bms->get_soc()
+    );
+};
+
+/**
+ * @brief Draw the charge/discharge times.
+ */
+void GUI::Actions::Draw_Time_Info(void)
+{
+    GUI::draw_time_info(
+        task_bms->get_time2empty(),
+        task_bms->get_time2full()
+    );
+};
+
+/**
  * @brief Clear the display canvas
  */
 void GUI::Actions::Clear_Buffer(void)
