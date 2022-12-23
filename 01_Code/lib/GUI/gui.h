@@ -58,4 +58,7 @@ namespace GUI
     void draw_time_info(const unsigned int time2empty, const unsigned int time2full);
     void clear_canvas(void);
 };
+
+// Expose the canvas object
+extern Graphics::Canvas_BW canvas;
 #endif

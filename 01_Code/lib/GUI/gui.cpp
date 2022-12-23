@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    gui.cpp
  * @author  SO
- * @version v2.1.0
+ * @version v3.0.0
  * @date    17-June-2022
  * @brief   Defines the GUI pages for the display.
  ******************************************************************************
@@ -36,7 +36,7 @@ static char line_string[24] = {0};
 // *** Display buffer ***
 static Graphics::Buffer_BW<128, 32> GUI_Buffer;
 // *** Display canvas object ***
-static Graphics::Canvas_BW canvas(GUI_Buffer.data.data(), GUI_Buffer.width_px, GUI_Buffer.height_px);
+Graphics::Canvas_BW canvas(GUI_Buffer.data.data(), GUI_Buffer.width_px, GUI_Buffer.height_px);
 
 // === Functions ===
 
@@ -61,7 +61,7 @@ void GUI::initialize_canvas(void)
     canvas.fill(Graphics::Black);
 
     // Write the first content in canvas
-    canvas.set_fontsize(Font::Size::Normal);
+    canvas.set_font(Font::_16px::Default);
 };
 
 /**
@@ -77,12 +77,12 @@ void GUI::draw_main_info(
     // Draw the voltage information
     canvas.set_cursor(0, 0);
     std::sprintf(line_string, "U: %d.%02d  V", voltage / 1000, (voltage / 10) % 100);
-    canvas.add_string(line_string);
+    canvas.write(line_string, 10);
 
     // Draw the current information
     canvas.set_cursor(0, 1);
     std::sprintf(line_string, "I:%+5d mA", current);
-    canvas.add_string(line_string);
+    canvas.write(line_string, 10);
 };
 
 /**
@@ -98,16 +98,16 @@ void GUI::draw_state_info(
     // Draw the output enabled information
     canvas.set_cursor(0, 0);
     if (output_enabled)
-        canvas.add_string("5V:    ON ");
+        canvas.write("5V:    ON ", 10);
     else
-        canvas.add_string("5V:    OFF");
+        canvas.write("5V:    OFF", 10);
 
     // Draw the charging information
     canvas.set_cursor(0, 1);
     if (is_charging)
-        canvas.add_string("Input: ON ");
+        canvas.write("Input: ON ", 10);
     else
-        canvas.add_string("Input: OFF");
+        canvas.write("Input: OFF", 10);
 };
 
 /**
@@ -123,12 +123,12 @@ void GUI::draw_cell_info(
     // Draw first cell voltage
     canvas.set_cursor(0, 0);
     std::sprintf(line_string, "C1: %d.%03dV", cell_1 / 1000, cell_1 - ( cell_1/1000)*1000);
-    canvas.add_string(line_string);
+    canvas.write(line_string, 10);
 
     // Draw second cell voltage
     canvas.set_cursor(0, 1);
     std::sprintf(line_string, "C2: %d.%03dV", cell_2 / 1000, cell_2 - ( cell_2/1000)*1000);
-    canvas.add_string(line_string);
+    canvas.write(line_string, 10);
 };
 
 /**
@@ -143,12 +143,12 @@ void GUI::draw_soc_info(const unsigned int capacity, const unsigned int soc)
     // Draw the capacity information
     canvas.set_cursor(0, 0);
     std::sprintf(line_string, "Cap:%2d.%dAh", capacity / 1000, (capacity % 1000)/100);
-    canvas.add_string(line_string);
+    canvas.write(line_string, 10);
 
     // Draw the SOC information
     canvas.set_cursor(0, 1);
     std::sprintf(line_string, "SOC: %3d %%", soc);
-    canvas.add_string(line_string);
+    canvas.write(line_string, 10);
 };
 
 /**
@@ -163,12 +163,12 @@ void GUI::draw_time_info(const unsigned int time2empty, const unsigned int time2
     // Draw the time to empty information
     canvas.set_cursor(0, 0);
     std::sprintf(line_string, "TTE:%3d.%dh", time2empty / 3600, (time2empty % 3600) / 360);
-    canvas.add_string(line_string);
+    canvas.write(line_string, 10);
 
     // Draw the time to full information
     canvas.set_cursor(0, 1);
     std::sprintf(line_string, "TTF:%3d.%dh", time2full / 3600, (time2full % 3600) / 360);
-    canvas.add_string(line_string);
+    canvas.write(line_string, 10);
 };
 
 /**

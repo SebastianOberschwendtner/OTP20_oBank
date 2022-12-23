@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    main.cpp
  * @author  SO
- * @version v2.1.0
+ * @version v3.0.0
  * @date    14-September-2021
  * @brief   Main firmware for the oBank.
  ******************************************************************************
@@ -43,7 +43,7 @@ int main(void)
     OS.schedule_thread<512>(&Task_System , OTOS::Priority::High, 5);
     OS.schedule_thread<512>(&Task_Display, OTOS::Priority::Normal);
     OS.schedule_thread<512>(&Task_BMS    , OTOS::Priority::Normal);
-    OS.schedule_thread<512>(&Task_PD     , OTOS::Priority::Normal);
+    OS.schedule_thread<512>(&Task_PD     , OTOS::Priority::Normal, 1);
 
     // Start the task execution
     OS.start();

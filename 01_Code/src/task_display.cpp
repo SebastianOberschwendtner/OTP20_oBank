@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    task_display.cpp
  * @author  SO
- * @version v2.0.0
+ * @version v3.0.0
  * @date    14-September-2021
  * @brief   Display task of the oBank
  ******************************************************************************
@@ -46,6 +46,7 @@ static IPC::Manager ipc_manager(IPC::Check::PID<IPC::Display>());
 static IPC::Display_Interface ipc_interface;
 // *** IPC task references
 static IPC::BMS_Interface *task_bms;
+static IPC::PD_Interface *task_pd;
 
 // *** GUI Actions and Events ***
 static GUI::Actions actions;
@@ -120,6 +121,11 @@ static void get_ipc(void)
     while (!IPC::Manager::get_data(IPC::BMS))
         OTOS::Task::yield();
     task_bms = static_cast<IPC::BMS_Interface *>(IPC::Manager::get_data(IPC::BMS).value());
+
+    // PD Task
+    while (!IPC::Manager::get_data(IPC::PD))
+        OTOS::Task::yield();
+    task_pd = static_cast<IPC::PD_Interface *>(IPC::Manager::get_data(IPC::PD).value());
 };
 
 // === IPC interface ===
@@ -207,9 +213,23 @@ void GUI::Actions::Draw_Time_Info(void)
 };
 
 /**
+ * @brief Draw the USB PD info.
+ */
+void GUI::Actions::Draw_PD_Info(void)
+{
+    GUI::clear_canvas();
+    canvas.set_font(Font::_8px::Default);
+    canvas.set_cursor(0, 0);
+    canvas << task_pd->debug[0] << OTOS::endl;
+    canvas << task_pd->debug[1] << OTOS::endl;
+    canvas << task_pd->debug[2] << OTOS::endl;
+};
+
+/**
  * @brief Clear the display canvas
  */
 void GUI::Actions::Clear_Buffer(void)
 {
+    canvas.set_font(Font::_16px::Default);
     // GUI::clear_canvas();
 };

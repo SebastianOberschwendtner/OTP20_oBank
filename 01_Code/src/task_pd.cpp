@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    task_pd.cpp
  * @author  SO
- * @version v2.0.0
+ * @version v3.0.0
  * @date    09-October-2021
  * @brief   Task for handling the Power Delivery of the oBank
  ******************************************************************************
@@ -34,6 +34,7 @@
 // *** I/O pins ***
 static GPIO::PIN SCL(GPIO::Port::A, 9);
 static GPIO::PIN SDA(GPIO::Port::A, 10);
+static GPIO::PIN EN_5V_AUX(GPIO::Port::B, 7, GPIO::Mode::Output);
 // *** i2c controller ***
 static I2C::Controller i2c(IO::I2C_1, 100000);
 // *** PD controller ***
@@ -53,10 +54,19 @@ void Task_PD(void)
 {
     // Setup stuff
     initialize();
+    // PD.write_command("SWSr");
+    OTOS::Task::yield();
+
+    TPS65987::PDO pdo{};
+    // unsigned long response = 0;
 
     // Start looping
     while(1)
     {
+        pdo = PD.read_TX_sink_pdo(1).value();
+        ipc_interface.debug[0] = pdo.get_voltage();
+        ipc_interface.debug[1] = pdo.get_current();
+        ipc_interface.debug[2] = 42;
         OTOS::Task::yield();
     };
 };
@@ -75,7 +85,10 @@ static void initialize(void)
     i2c.enable();
 
     // Initialize the charger interface
-    // PD.initialize();
+    EN_5V_AUX.set_low();
+    PD.initialize();
+
+
     OTOS::Task::yield();
 };
 

@@ -56,6 +56,7 @@ namespace IPC
     // ===  Data interface to the PD task ===
     struct PD_Interface
     {
+        std::array<unsigned long, 4> debug{0};
         void sleep(void);
         void wake(void);
     };

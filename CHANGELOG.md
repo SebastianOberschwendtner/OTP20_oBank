@@ -8,8 +8,8 @@
 - Adds **ETL** state machine to system task.
 - Adds **ETL** state machine to display task.
 - Adds further BMS parameters to the GUI.
-#### :bookmark: `v2.2.0`
--
+#### :bookmark: `v3.0.0`
+- Activates the PD controller.
 
 ### Fixed Issues:
 

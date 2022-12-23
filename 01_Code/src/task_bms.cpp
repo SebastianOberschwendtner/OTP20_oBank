@@ -33,6 +33,7 @@
 // === Global data within task ===
 // *** I/O pins ***
 static GPIO::PIN CHR_OK(GPIO::Port::A, 2, GPIO::Mode::Input);
+static GPIO::PIN EN_OTG(GPIO::Port::B, 5, GPIO::Mode::Output);
 static GPIO::PIN SCL(GPIO::Port::A, 9);
 static GPIO::PIN SDA(GPIO::Port::A, 10);
 // *** i2c controller ***
@@ -75,6 +76,8 @@ void Task_BMS(void)
         // Manage charging
         if (CHR_OK.get_state())
         {
+            EN_OTG.set_low();
+            Charger.enable_OTG(false);
             // Input power is present, set charge current
             if(Charger.set_charge_current(User::Power::Max_Charge_Current))
                 Led_Red.set_state(true);
@@ -83,6 +86,8 @@ void Task_BMS(void)
         }
         else
         {
+            // EN_OTG.set_high();
+            // Charger.enable_OTG(true);
             // Turn off red LED
             Led_Red.set_state(false);
         }
@@ -107,7 +112,10 @@ static void initialize(void)
     // Initialize the charger interface
     CHR_OK.set_pull(GPIO::Pull::Pull_Up);
     CHR_OK.enable_interrupt(GPIO::Edge::Rising);
+    EN_OTG.set_low();
     Charger.initialize();
+    Charger.set_OTG_voltage(5000);
+    Charger.set_OTG_current(500);
 
     // Initialize the BMS Chip
     BMS.initialize();
