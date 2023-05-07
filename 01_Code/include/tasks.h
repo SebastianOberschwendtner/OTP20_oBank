@@ -21,18 +21,11 @@
 #ifndef TASKS_H_
 #define TASKS_H_
 
-// === Includes ===
-// => General includes which are needed by all tasks
-#include "drivers.h"
-#include "task.h"
-#include "interprocess.h"
-#include "configuration.h"
-
 // === Tasks ===
 // => Add the tasks declaration here so the main.cpp can find them
 void Task_System(void);
 void Task_Display(void);
-void Task_BMS(void);
+void Task_BMS();
 void Task_PD(void);
 
 #endif

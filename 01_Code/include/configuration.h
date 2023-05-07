@@ -46,7 +46,7 @@ namespace User
          * @brief The timeout for the user interface in milli seconds.
          * @fixed: Add strong time type. 
          */
-        constexpr auto Display = 10s;
+        constexpr auto Display = 15s;
 
         /**
          * @brief The timeout for detecting a button hold.

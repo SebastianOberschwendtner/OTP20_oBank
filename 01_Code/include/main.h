@@ -25,6 +25,7 @@
 
 // === Includes ===
 #include "kernel.h"
+#include "drivers.h"
 
 // === Tasks ===
 #include "tasks.h"

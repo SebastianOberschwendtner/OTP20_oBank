@@ -1,5 +1,15 @@
 # Changelog for OTP-20 oBank
-## [v3.0.0](https://github.com/SebastianOberschwendtner/OTP20_oBank/releases/tag/v3.0.0) *(2022-xx-xx)*
+## [v4.0.0](https://github.com/SebastianOberschwendtner/OTP20_oBank/releases/tag/v4.0.0) *(2023-xx-xx)*
+
+>Released by `SO`
+
+### Release Notes:
+
+### Fixed Issues:
+
+- n/a
+
+## [v3.0.0](https://github.com/SebastianOberschwendtner/OTP20_oBank/releases/tag/v3.0.0) *(2023-05-07)*
 
 >Released by `SO`
 
@@ -10,6 +20,7 @@
 - Adds further BMS parameters to the GUI.
 #### :bookmark: `v3.0.0`
 - Activates the PD controller.
+- Refactors the interprocess communication and adds command queues using **ETL**.
 
 ### Fixed Issues:
 

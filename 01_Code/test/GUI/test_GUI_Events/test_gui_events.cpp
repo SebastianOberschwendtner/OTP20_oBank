@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    test_gui_events.cpp
  * @author  SO
- * @version v2.1.1
+ * @version v3.0.0
  * @date    18-June-2022
  * @brief   Unit tests for the GUI Events of the oBank.
  ******************************************************************************
@@ -40,6 +40,7 @@ void GUI::Actions::Draw_Status_Info(void) { return; };
 void GUI::Actions::Draw_Cell_Info(void) { return; };
 void GUI::Actions::Draw_SOC_Info(void) { return; };
 void GUI::Actions::Draw_Time_Info(void) { return; };
+void GUI::Actions::Draw_PD_Info(void) { return; };
 void GUI::Actions::Clear_Buffer(void) { return; };
 
 // *** Setup and Teardown functions ***

@@ -28,56 +28,95 @@
  */
 
 // === Includes ===
-#include "tasks.h"
+#include "drivers.h"
+#include "task.h"
+#include "interprocess.h"
+#include "configuration.h"
 #include "kernel.h"
 #include "system.h"
 #include <string>
 
-// === Global data within task ===
-// *** I/O pins ***
-static GPIO::PIN Led_Green{GPIO::Port::B, 0, GPIO::Mode::Output};
-static GPIO::PIN Led_Red{GPIO::Port::B, 1, GPIO::Mode::Output};
-static GPIO::PIN EN_5V{GPIO::Port::B, 6, GPIO::Mode::Output};
-static GPIO::PIN Button{GPIO::Port::A, 0, GPIO::Mode::Input};
+namespace
+{
+    // === Global data within task ===
+    // *** I/O pins ***
+    GPIO::PIN Led_Green{GPIO::Port::B, 0, GPIO::Mode::Output};
+    GPIO::PIN Led_Red{GPIO::Port::B, 1, GPIO::Mode::Output};
+    GPIO::PIN EN_OTG(GPIO::Port::B, 5, GPIO::Mode::Output);
+    GPIO::PIN EN_5V{GPIO::Port::B, 6, GPIO::Mode::Output};
+    GPIO::PIN Button{GPIO::Port::A, 0, GPIO::Mode::Input};
 
-// *** IPC Interface to other tasks ***
-static IPC::Display_Interface *task_display;
-static IPC::BMS_Interface *task_bms;
-static IPC::PD_Interface *task_pd;
+    // *** IPC Interface to other tasks ***
+    IPC::Display_Interface *task_display;
+    IPC::BMS_Interface *task_bms;
+    IPC::PD_Interface *task_pd;
 
-// *** System Actions and Events ***
-static System::Actions actions;
-static System::Events events{
-    User::Timeout::Display,
-    User::Timeout::Button_Hold,
-    Button};
+    // *** System Actions and Events ***
+    System::Actions actions;
+    System::Events events{
+        User::Timeout::Display,
+        User::Timeout::Button_Hold,
+        Button};
 
-// *** The System State Machine ***
-static etl::state_chart_ct<
-    System::Actions, actions,
-    System::TransitionTable, std::size(System::TransitionTable),
-    System::StateTable, std::size(System::StateTable),
-    System::State_ID::Initialize>
-    state_machine;
+    // *** The System State Machine ***
+    etl::state_chart_ct<
+        System::Actions, actions,
+        System::TransitionTable, std::size(System::TransitionTable),
+        System::StateTable, std::size(System::StateTable),
+        System::State_ID::Initialize>
+        state_machine;
+
+    /**
+     * @brief Configure the sleep mode.
+     */
+    void configure_sleep()
+    {
+        // Setup the Sleep mode
+        RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+        PWR->CSR = 0;
+        // PWR->CR = 0;
+        PWR->CR |= PWR_CR_ULP | PWR_CR_LPSDSR; // V_{REFINT} is off in low-power mode
+        // PWR->CR |= PWR_CR_PDDS;
+        SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+    };
+
+    /**
+     * @brief Get the IPC data needed for task execution
+     */
+    void get_ipc()
+    {
+        // Display Task
+        task_display = IPC::wait_for_data<IPC::Display_Interface>(IPC::Display);
+
+        // BMS Task
+        task_bms = IPC::wait_for_data<IPC::BMS_Interface>(IPC::BMS);
+
+        // PD Task
+        task_pd = IPC::wait_for_data<IPC::PD_Interface>(IPC::PD);
+    };
+}; // namespace
 
 // === System Task ===
 /**
  * @brief Main task for system stuff of the oBank
  */
-void Task_System(void)
+void Task_System()
 {
     // Start the state machine which should call the initialize function
     state_machine.start();
 
+
     // Start looping
-    while (1)
+    while (true)
     {
         // Handle the state machine
         auto event = events.get_event(std::chrono::milliseconds(OTOS::get_time_ms()));
         state_machine.process_event(event);
 
-        // Indicate the 5V pin state with the green led
-        Led_Green.set_state(EN_5V.get_state());
+        // Indicate the general output state with the green led
+        Led_Green.set_state(
+            EN_5V.get_state() || EN_OTG.get_state()
+        );
 
         // and yield
         OTOS::Task::yield();
@@ -85,48 +124,14 @@ void Task_System(void)
 };
 
 /**
- * @brief Configure the sleep mode.
- */
-static void configure_sleep(void)
-{
-    // Setup the Sleep mode
-    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-    PWR->CSR = 0;
-    // PWR->CR = 0;
-    PWR->CR |= PWR_CR_ULP | PWR_CR_LPSDSR; // V_{REFINT} is off in low-power mode
-    // PWR->CR |= PWR_CR_PDDS;
-    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
-};
-
-/**
- * @brief Get the IPC data needed for task execution
- */
-static void get_ipc(void)
-{
-    // Display Task
-    while (!IPC::Manager::get_data(IPC::Display))
-        OTOS::Task::yield();
-    task_display = static_cast<IPC::Display_Interface *>(IPC::Manager::get_data(IPC::Display).value());
-
-    // BMS Task
-    while (!IPC::Manager::get_data(IPC::BMS))
-        OTOS::Task::yield();
-    task_bms = static_cast<IPC::BMS_Interface *>(IPC::Manager::get_data(IPC::BMS).value());
-
-    // PD Task
-    while (!IPC::Manager::get_data(IPC::PD))
-        OTOS::Task::yield();
-    task_pd = static_cast<IPC::PD_Interface *>(IPC::Manager::get_data(IPC::PD).value());
-};
-
-/**
  * @brief Initialize the system task.
  */
-void System::Actions::Initialize(void)
+void System::Actions::Initialize()
 {
     // Enable the interrupt for button input to wake up from sleep
     Button.enable_interrupt(GPIO::Edge::Rising);
     // Make sure that 5V Output is disabled
+    EN_OTG.set_low();
     EN_5V.set_low();
     // Configure the sleep mode
     configure_sleep();
@@ -140,7 +145,7 @@ void System::Actions::Initialize(void)
 /**
  * @brief Configure every task to sleep and then goto sleep mode.
  */
-void System::Actions::Sleep(void)
+void System::Actions::Sleep()
 {
     // Turn of all LEDs
     Led_Green.set_low();
@@ -157,7 +162,7 @@ void System::Actions::Sleep(void)
 /**
  * @brief Wake up the system from sleep mode.
  */
-void System::Actions::Wake_Up(void)
+void System::Actions::Wake_Up()
 {
     // wake up all other tasks
     task_display->wake();
@@ -173,21 +178,22 @@ void System::Actions::Wake_Up(void)
  * the 5V output is toggled. When the button is low again,
  * the GUI page is changed.
  */
-void System::Actions::Handle_User_Input(void)
+void System::Actions::Handle_User_Input()
 {
-    // Toggle the 5V output when the button is pressed
+    // Toggle both output states when the button is pressed
     if (Button.get_state())
+    {
+        EN_OTG.toggle();
         EN_5V.toggle();
-
-    // Change the GUI page
-    else
+    }
+    else // Change the GUI page
         task_display->next_page();
 };
 
 /**
  * @brief Reset all timeouts to current system time.
  */
-void System::Actions::Reset_Timeouts(void)
+void System::Actions::Reset_Timeouts()
 {
     events.reset_timeouts(
         std::chrono::milliseconds(OTOS::get_time_ms()));
@@ -197,7 +203,7 @@ void System::Actions::Reset_Timeouts(void)
  * @brief Check whether battery is currently charging.
  * @return Returns true if the battery is not charging.
  */
-bool System::Actions::not_charging(void)
+auto System::Actions::not_charging() -> bool
 {
     return !task_bms->is_charging();
 };

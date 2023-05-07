@@ -31,10 +31,10 @@
 #include "main.h"
 
 // === Functions ===
-OTOS::Kernel OS;
+OTOS::Kernel OS; // NOLINT
 
 // === Main ===
-int main(void)
+int main() // NOLINT
 {
     // Configure the SysTick timer to generate an interrupt every 1ms
     Timer::SysTick_Configure();
@@ -43,7 +43,7 @@ int main(void)
     OS.schedule_thread<512>(&Task_System , OTOS::Priority::High, 5);
     OS.schedule_thread<512>(&Task_Display, OTOS::Priority::Normal);
     OS.schedule_thread<512>(&Task_BMS    , OTOS::Priority::Normal);
-    OS.schedule_thread<512>(&Task_PD     , OTOS::Priority::Normal, 1);
+    OS.schedule_thread<512>(&Task_PD     , OTOS::Priority::Normal);
 
     // Start the task execution
     OS.start();
@@ -59,5 +59,5 @@ int main(void)
 extern "C" void SysTick_Handler(void)
 {
     OS.update_schedule();
-    OS.count_time_ms();
+    OS.count_time_ms(); // NOLINT
 };

@@ -28,46 +28,83 @@
  */
 
 // === Includes ===
-#include "tasks.h"
+#include "drivers.h"
+#include "task.h"
+#include "interprocess.h"
+#include "configuration.h"
 #include "gui.h"
 
-// === Global data within task ===
-// *** I/O pins ***
-static GPIO::PIN SCL(GPIO::Port::A, 8);
-static GPIO::PIN SDA(GPIO::Port::B, 4);
-static GPIO::PIN EN_5V{GPIO::Port::B, 6, GPIO::Mode::Output};
-// *** i2c controller ***
-static I2C::Controller i2c(IO::I2C_3, 100000);
-// *** Display controller ***
-static SSD1306::Controller Display(i2c);
-// *** IPC Mananger ***
-static IPC::Manager ipc_manager(IPC::Check::PID<IPC::Display>());
-// *** IPC Interface ***
-static IPC::Display_Interface ipc_interface;
-// *** IPC task references
-static IPC::BMS_Interface *task_bms;
-static IPC::PD_Interface *task_pd;
+namespace
+{
+    // === Global data within task ===
+    // *** I/O pins ***
+    GPIO::PIN SCL(GPIO::Port::A, 8);
+    GPIO::PIN SDA(GPIO::Port::B, 4);
+    GPIO::PIN EN_5V{GPIO::Port::B, 6, GPIO::Mode::Output};
+    // *** i2c controller ***
+    I2C::Controller i2c(IO::I2C_3, 100000);
+    // *** Display controller ***
+    SSD1306::Controller Display(i2c);
+    // *** IPC Mananger ***
+    IPC::Manager ipc_manager(IPC::Check::PID<IPC::Display>());
+    // *** IPC Interface ***
+    IPC::Display_Interface ipc_interface;
+    // *** IPC task references
+    IPC::BMS_Interface *task_bms;
+    IPC::PD_Interface *task_pd;
 
-// *** GUI Actions and Events ***
-static GUI::Actions actions;
-static GUI::Events events;
+    // *** GUI Actions and Events ***
+    GUI::Actions actions;
+    GUI::Events events;
 
-// *** The GUI State Machine ***
-static etl::state_chart_ct<
-    GUI::Actions, actions,
-    GUI::TransitionTable, std::size(GUI::TransitionTable),
-    GUI::StateTable, std::size(GUI::StateTable),
-    GUI::State_ID::Main_Info>
-    state_machine;
+    // *** The GUI State Machine ***
+    etl::state_chart_ct<
+        GUI::Actions, actions,
+        GUI::TransitionTable, std::size(GUI::TransitionTable),
+        GUI::StateTable, std::size(GUI::StateTable),
+        GUI::State_ID::Main_Info>
+        state_machine;
 
-// === Functions ===
-static void initialize(void);
-static void get_ipc(void);
+    // === Functions ===
+
+    /**
+     * @brief Initialize the task
+     */
+    void initialize()
+    {
+        // Register the IPC interface
+        ipc_manager.register_data(&ipc_interface);
+
+        // Set up the i2c interface
+        SCL.set_alternate_function(IO::I2C_3);
+        SDA.set_alternate_function(IO::I2C_3);
+        i2c.enable();
+
+        // Initialize the display
+        GUI::initialize_canvas();
+        Display.initialize();
+
+        Display.on();
+        OTOS::Task::yield();
+    };
+
+    /**
+     * @brief Get the IPC data needed for task execution
+     */
+    void get_ipc()
+    {
+        // BMS Task
+        task_bms = IPC::wait_for_data<IPC::BMS_Interface>(IPC::BMS);
+
+        // PD Task
+        task_pd = IPC::wait_for_data<IPC::PD_Interface>(IPC::PD);
+    };
+}; // namespace
 
 /**
  * @brief Main task for handling the display interface
  */
-void Task_Display(void)
+void Task_Display()
 {
     // Setup stuff
     initialize();
@@ -79,7 +116,7 @@ void Task_Display(void)
     state_machine.start();
 
     // Start looping
-    while (1)
+    while (true)
     {
         // Handle the state machine
         auto event = events.get_event();
@@ -91,49 +128,12 @@ void Task_Display(void)
     };
 };
 
-/**
- * @brief Initialize the task
- */
-static void initialize(void)
-{
-    // Register the IPC interface
-    ipc_manager.register_data(&ipc_interface);
-
-    // Set up the i2c interface
-    SCL.set_alternate_function(IO::I2C_3);
-    SDA.set_alternate_function(IO::I2C_3);
-    i2c.enable();
-
-    // Initialize the display
-    GUI::initialize_canvas();
-    Display.initialize();
-
-    Display.on();
-    OTOS::Task::yield();
-};
-
-/**
- * @brief Get the IPC data needed for task execution
- */
-static void get_ipc(void)
-{
-    // BMS Task
-    while (!IPC::Manager::get_data(IPC::BMS))
-        OTOS::Task::yield();
-    task_bms = static_cast<IPC::BMS_Interface *>(IPC::Manager::get_data(IPC::BMS).value());
-
-    // PD Task
-    while (!IPC::Manager::get_data(IPC::PD))
-        OTOS::Task::yield();
-    task_pd = static_cast<IPC::PD_Interface *>(IPC::Manager::get_data(IPC::PD).value());
-};
-
 // === IPC interface ===
 
 /**
  * @brief Set everything up for sleep mode
  */
-void IPC::Display_Interface::sleep(void)
+void IPC::Display_Interface::sleep()
 {
     ::Display.off();
 };
@@ -141,7 +141,7 @@ void IPC::Display_Interface::sleep(void)
 /**
  * @brief Set everything up after waking up
  */
-void IPC::Display_Interface::wake(void)
+void IPC::Display_Interface::wake()
 {
     ::Display.on();
 };
@@ -149,7 +149,7 @@ void IPC::Display_Interface::wake(void)
 /**
  * @brief Increase the display page
  */
-void IPC::Display_Interface::next_page(void)
+void IPC::Display_Interface::next_page()
 {
     // Trigger the next page event
     events.next_page.trigger();
@@ -160,7 +160,7 @@ void IPC::Display_Interface::next_page(void)
 /**
  * @brief Draw the main info page
  */
-void GUI::Actions::Draw_Main_Info(void)
+void GUI::Actions::Draw_Main_Info()
 {
     // Draw the main info
     GUI::draw_main_info(
@@ -172,7 +172,7 @@ void GUI::Actions::Draw_Main_Info(void)
 /**
  * @brief Draw the status info page
  */
-void GUI::Actions::Draw_Status_Info(void)
+void GUI::Actions::Draw_Status_Info()
 {
     GUI::draw_state_info(
         EN_5V.get_state(), 
@@ -182,7 +182,7 @@ void GUI::Actions::Draw_Status_Info(void)
 /**
  * @brief Draw the cell info page
  */
-void GUI::Actions::Draw_Cell_Info(void)
+void GUI::Actions::Draw_Cell_Info()
 {
     GUI::draw_cell_info(
         task_bms->get_cell_voltage(1),
@@ -193,7 +193,7 @@ void GUI::Actions::Draw_Cell_Info(void)
 /**
  * @brief Draw the SOC info.
  */
-void GUI::Actions::Draw_SOC_Info(void)
+void GUI::Actions::Draw_SOC_Info()
 {
     GUI::draw_soc_info(
         task_bms->get_remaining_capacity(),
@@ -204,7 +204,7 @@ void GUI::Actions::Draw_SOC_Info(void)
 /**
  * @brief Draw the charge/discharge times.
  */
-void GUI::Actions::Draw_Time_Info(void)
+void GUI::Actions::Draw_Time_Info()
 {
     GUI::draw_time_info(
         task_bms->get_time2empty(),
@@ -215,20 +215,19 @@ void GUI::Actions::Draw_Time_Info(void)
 /**
  * @brief Draw the USB PD info.
  */
-void GUI::Actions::Draw_PD_Info(void)
+void GUI::Actions::Draw_PD_Info()
 {
     GUI::clear_canvas();
     canvas.set_font(Font::_8px::Default);
     canvas.set_cursor(0, 0);
-    canvas << task_pd->debug[0] << OTOS::endl;
-    canvas << task_pd->debug[1] << OTOS::endl;
-    canvas << task_pd->debug[2] << OTOS::endl;
+    canvas << "PDO U: " << task_pd->get_voltage() << " mV" << OTOS::endl;
+    canvas << "PDO I: " << task_pd->get_current() << " mA" << OTOS::endl;
 };
 
 /**
  * @brief Clear the display canvas
  */
-void GUI::Actions::Clear_Buffer(void)
+void GUI::Actions::Clear_Buffer()
 {
     canvas.set_font(Font::_16px::Default);
     // GUI::clear_canvas();
