@@ -17,7 +17,7 @@ Open Source Power Bank with Power Delivery Capability.
 ## Software Framework
 <!-- ![IDE1](https://img.shields.io/static/v1?label=IDE&message=Eclipse&color=yellowgreen) -->
 ![GitHub Build Status](https://img.shields.io/github/actions/workflow/status/SebastianOberschwendtner/OTP20_oBank/Build.yml?branch=main)
-![GitHub Test Status](https://img.shields.io/github/actions/workflow/status/SebastianOberschwendtner/OTP20_oBank/Test.yml?branch=main?label=test)
+![GitHub Test Status](https://img.shields.io/github/actions/workflow/status/SebastianOberschwendtner/OTP20_oBank/Test.yml?label=test)
 ![IDE2](https://img.shields.io/static/v1?label=IDE&message=VSCode&color=yellowgreen)
 ![GitHub top language](https://img.shields.io/github/languages/top/SebastianOberschwendtner/OTP20_oBank?color=brightgreen)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/SebastianOberschwendtner/OTP20_oBank)
