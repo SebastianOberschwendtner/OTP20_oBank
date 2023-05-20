@@ -35,7 +35,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run static code analysis
-      run: pio check -d 01_Code --skip-packages --fail-on-defect=high --fail-on-defect=medium
+      run: pio check -d ${GITHUB_WORKSPACE}/01_Code --skip-packages --fail-on-defect=high --fail-on-defect=medium
     
   unit-test:
 
