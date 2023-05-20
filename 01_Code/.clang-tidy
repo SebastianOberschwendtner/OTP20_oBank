@@ -1,0 +1,33 @@
+---
+Checks:          'bugprone-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  google-*,
+  misc-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-magic-numbers,
+  -google-readability-braces-around-statements,
+  -readability-braces-around-statements,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-avoid-non-const-global-variables'
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle:     LLVM
+User:            Sebastian
+CheckOptions:
+  modernize-loop-convert.MinConfidence: reasonable
+  google-readability-namespace-comments.ShortNamespaceLines: '10'
+  google-readability-braces-around-statements.ShortStatementLines: '1'
+  cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: 'true'
+  google-readability-namespace-comments.SpacesBeforeComments: '2'
+  modernize-loop-convert.MaxCopySize: '16'
+  modernize-use-nullptr.NullMacros: 'NULL'
+  modernize-loop-convert.NamingStyle: CamelCase
+  google-readability-function-size.StatementThreshold: '800'
+...
+
