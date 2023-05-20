@@ -4,10 +4,15 @@
 >Released by `SO`
 
 ### Release Notes:
+#### :bookmark: `v3.1.0`
+- Major update of IPC messaging within the tasks.
+- Activates the *ALRT* pin of the BMS chip to prevent battery damage. Fixes #7.
+- Led indicate the actual output state not just the assumed one.
 
 ### Fixed Issues:
 
-- n/a
+- #6: Cell balancing not working *(Not a direct software issue)*
+- #7: Add automatic shutoff when battery is depleted
 
 ## [v3.0.0](https://github.com/SebastianOberschwendtner/OTP20_oBank/releases/tag/v3.0.0) *(2023-05-07)*
 

@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    events.cpp
  * @author  SO
- * @version v2.1.0
+ * @version v3.1.0
  * @date    16-June-2021
  * @brief   The system events of the oBank.
  ******************************************************************************
@@ -41,16 +41,16 @@
  * @param current_time The current time in milliseconds.
  * @return Returns true when the event is triggered.
  */
-bool Event::Timeout::is_triggered(std::chrono::milliseconds current_time)
+auto Event::Timeout::is_triggered(std::chrono::milliseconds current_time) -> bool
 {
     // Check for timeout
-    if (current_time - last_triggered >= timeout)
+    if (current_time - this->last_triggered >= this->timeout)
     {
         // remember the last triggered time and return
-        last_triggered = current_time;
-        return true;
+        this->last_triggered = current_time;
+        return {true};
     }
-    return false;
+    return {false};
 };
 
 /**
@@ -60,7 +60,7 @@ bool Event::Timeout::is_triggered(std::chrono::milliseconds current_time)
  */
 void Event::Timeout::reset(std::chrono::milliseconds current_time)
 {
-    last_triggered = current_time;
+    this->last_triggered = current_time;
 };
 
 /**
@@ -75,11 +75,11 @@ void Event::Timeout::reset(std::chrono::milliseconds current_time)
  * function updates the old pin state. Other edges in the same Pin are shadowed
  * by using multiple events with the same Pin!
  */
-bool Event::Button::is_triggered(void)
+auto Event::Button::is_triggered() -> bool
 {
     this->button->read_edge();
-    bool is_rising = this->button->rising_edge();
-    bool is_falling = this->button->falling_edge();
+    const bool is_rising = this->button->rising_edge();
+    const bool is_falling = this->button->falling_edge();
 
     switch (this->trigger_edge)
     {

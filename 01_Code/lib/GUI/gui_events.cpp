@@ -21,7 +21,7 @@
  ******************************************************************************
  * @file    gui_events.cpp
  * @author  SO
- * @version v2.1.0
+ * @version v3.1.0
  * @date    18-June-2021
  * @brief   The gui events of the oBank.
  ******************************************************************************
@@ -40,10 +40,10 @@
  *
  * @return Returns true when the event is triggered.
  */
-bool Event::Next_Page::is_triggered(void)
+auto Event::Next_Page::is_triggered() -> bool
 {
     // read the state of the event
-    bool state = this->event_active;
+    const bool state = this->event_active;
 
     // A read resets the state
     this->event_active = false;
@@ -55,7 +55,7 @@ bool Event::Next_Page::is_triggered(void)
 /**
  * @brief Manually trigger the next page event.
  */
-void Event::Next_Page::trigger(void)
+void Event::Next_Page::trigger()
 {
     // Set the state of the event
     this->event_active = true;

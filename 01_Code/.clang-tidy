@@ -1,5 +1,7 @@
 ---
-Checks:          'bugprone-*,
+Checks:
+  '-*,
+  bugprone-*,
   clang-analyzer-*,
   cppcoreguidelines-*,
   google-*,

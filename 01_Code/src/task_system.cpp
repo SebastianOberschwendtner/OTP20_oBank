@@ -21,20 +21,20 @@
  ******************************************************************************
  * @file    task_system.cpp
  * @author  SO
- * @version v2.0.0
+ * @version v3.1.0
  * @date    16-September-2021
  * @brief   Main system task of the oBank.
  ******************************************************************************
  */
 
 // === Includes ===
+#include <string>
 #include "drivers.h"
 #include "task.h"
 #include "interprocess.h"
 #include "configuration.h"
 #include "kernel.h"
 #include "system.h"
-#include <string>
 
 namespace
 {
@@ -42,14 +42,12 @@ namespace
     // *** I/O pins ***
     GPIO::PIN Led_Green{GPIO::Port::B, 0, GPIO::Mode::Output};
     GPIO::PIN Led_Red{GPIO::Port::B, 1, GPIO::Mode::Output};
-    GPIO::PIN EN_OTG(GPIO::Port::B, 5, GPIO::Mode::Output);
-    GPIO::PIN EN_5V{GPIO::Port::B, 6, GPIO::Mode::Output};
     GPIO::PIN Button{GPIO::Port::A, 0, GPIO::Mode::Input};
 
     // *** IPC Interface to other tasks ***
-    IPC::Display_Interface *task_display;
+    // IPC::Display_Interface *task_display;
     IPC::BMS_Interface *task_bms;
-    IPC::PD_Interface *task_pd;
+    // IPC::PD_Interface *task_pd;
 
     // *** System Actions and Events ***
     System::Actions actions;
@@ -67,32 +65,19 @@ namespace
         state_machine;
 
     /**
-     * @brief Configure the sleep mode.
+     * @brief Configure the sleep mode:
+     * - Enter Stop Mode
+     * - Wake up from any EXTI line
      */
     void configure_sleep()
     {
         // Setup the Sleep mode
         RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-        PWR->CSR = 0;
+        PWR->CSR = 0U;
         // PWR->CR = 0;
         PWR->CR |= PWR_CR_ULP | PWR_CR_LPSDSR; // V_{REFINT} is off in low-power mode
         // PWR->CR |= PWR_CR_PDDS;
         SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
-    };
-
-    /**
-     * @brief Get the IPC data needed for task execution
-     */
-    void get_ipc()
-    {
-        // Display Task
-        task_display = IPC::wait_for_data<IPC::Display_Interface>(IPC::Display);
-
-        // BMS Task
-        task_bms = IPC::wait_for_data<IPC::BMS_Interface>(IPC::BMS);
-
-        // PD Task
-        task_pd = IPC::wait_for_data<IPC::PD_Interface>(IPC::PD);
     };
 }; // namespace
 
@@ -105,7 +90,6 @@ void Task_System()
     // Start the state machine which should call the initialize function
     state_machine.start();
 
-
     // Start looping
     while (true)
     {
@@ -113,10 +97,9 @@ void Task_System()
         auto event = events.get_event(std::chrono::milliseconds(OTOS::get_time_ms()));
         state_machine.process_event(event);
 
-        // Indicate the general output state with the green led
-        Led_Green.set_state(
-            EN_5V.get_state() || EN_OTG.get_state()
-        );
+        // Indicate the general output state with the leds
+        Led_Green.set_state(IPC::BMS_Interface::outputs_enabled());
+        Led_Red.set_state(IPC::BMS_Interface::is_charging());
 
         // and yield
         OTOS::Task::yield();
@@ -126,17 +109,18 @@ void Task_System()
 /**
  * @brief Initialize the system task.
  */
-void System::Actions::Initialize()
+void System::Actions::Initialize() // NOLINT(*-convert-member-functions-to-static)
 {
     // Enable the interrupt for button input to wake up from sleep
     Button.enable_interrupt(GPIO::Edge::Rising);
-    // Make sure that 5V Output is disabled
-    EN_OTG.set_low();
-    EN_5V.set_low();
+
     // Configure the sleep mode
     configure_sleep();
+
     // Get the IPC data
-    get_ipc();
+    // task_display = IPC::wait_for_data<IPC::Display_Interface>(IPC::Display);
+    task_bms = IPC::wait_for_data<IPC::BMS_Interface>(IPC::BMS);
+    // task_pd = IPC::wait_for_data<IPC::PD_Interface>(IPC::PD);
 
     // Yield for other tasks
     OTOS::Task::yield();
@@ -145,15 +129,15 @@ void System::Actions::Initialize()
 /**
  * @brief Configure every task to sleep and then goto sleep mode.
  */
-void System::Actions::Sleep()
+void System::Actions::Sleep() // NOLINT(*-convert-member-functions-to-static)
 {
-    // Turn of all LEDs
+    // Turn of green Led -> Keep red led on when charging
     Led_Green.set_low();
 
-    // put all other tasks to sleep
-    task_display->sleep();
-    task_bms->sleep();
-    task_pd->sleep();
+    // Put all other tasks to sleep
+    IPC::Display_Interface::sleep();
+    IPC::BMS_Interface::sleep();
+    IPC::PD_Interface::sleep();
 
     // This enters the sleep mode of the ARM
     __WFI();
@@ -162,12 +146,12 @@ void System::Actions::Sleep()
 /**
  * @brief Wake up the system from sleep mode.
  */
-void System::Actions::Wake_Up()
+void System::Actions::Wake_Up() // NOLINT(*-convert-member-functions-to-static)
 {
-    // wake up all other tasks
-    task_display->wake();
-    task_bms->wake();
-    task_pd->wake();
+    // Wake up all other tasks
+    IPC::Display_Interface::wake();
+    IPC::BMS_Interface::wake();
+    IPC::PD_Interface::wake();
 };
 
 /**
@@ -178,22 +162,23 @@ void System::Actions::Wake_Up()
  * the 5V output is toggled. When the button is low again,
  * the GUI page is changed.
  */
-void System::Actions::Handle_User_Input()
+void System::Actions::Handle_User_Input() // NOLINT(*-convert-member-functions-to-static)
 {
     // Toggle both output states when the button is pressed
     if (Button.get_state())
     {
-        EN_OTG.toggle();
-        EN_5V.toggle();
+        task_bms->push_command(
+            IPC::Command::Output{IPC::Command::Output::State::Toggle}
+        );
     }
     else // Change the GUI page
-        task_display->next_page();
+        IPC::Display_Interface::next_page();
 };
 
 /**
  * @brief Reset all timeouts to current system time.
  */
-void System::Actions::Reset_Timeouts()
+void System::Actions::Reset_Timeouts() // NOLINT(*-convert-member-functions-to-static)
 {
     events.reset_timeouts(
         std::chrono::milliseconds(OTOS::get_time_ms()));
@@ -203,9 +188,9 @@ void System::Actions::Reset_Timeouts()
  * @brief Check whether battery is currently charging.
  * @return Returns true if the battery is not charging.
  */
-auto System::Actions::not_charging() -> bool
+auto System::Actions::not_charging() -> bool // NOLINT(*-convert-member-functions-to-static)
 {
-    return !task_bms->is_charging();
+    return !IPC::BMS_Interface::is_charging();
 };
 
 /**

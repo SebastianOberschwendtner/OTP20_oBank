@@ -65,29 +65,33 @@ namespace IPC
             uint16_t current{0}; // Current in [mA] // NOLINT
             explicit Current(uint16_t current) : current(current) {};
         };
+
+        /**
+         * @brief Set the state of an output. (On/Off/Toggle)
+         *        The effect of this message depends on the receiver!
+         */
+        struct Output: public etl::message<2>
+        {
+            enum class State
+            {
+                On,
+                Off,
+                Toggle
+            };
+            State state{State::Off}; // The state to set the output to // NOLINT
+            explicit Output(State state) : state(state) {};
+        };
     }; // namespace Command
 
-    // ===  Data interface to the BMS task ===
-    class BMS_Interface
+    /**
+     * @brief Base class for all command queues.
+     * 
+     * @tparam cmds The accepted commands of the queue.
+     */
+    template<typename ...cmds>
+    class CommandQueue
     {
     public:
-        /* Define the accepted command types */
-        using commands = etl::message_packet<Command::Voltage, Command::Current>;
-
-        /* Define public data access */
-        [[nodiscard]] unsigned int get_battery_voltage() const;
-        [[nodiscard]] signed int get_battery_current() const;
-        [[nodiscard]] unsigned int get_cell_voltage(unsigned char cell) const;
-        [[nodiscard]] unsigned int get_remaining_capacity() const;
-        [[nodiscard]] unsigned int get_soc() const;
-        [[nodiscard]] unsigned int get_time2empty() const;
-        [[nodiscard]] unsigned int get_time2full() const;
-        [[nodiscard]] bool is_charging() const;
-
-        /* Simple blocking interface functions*/
-        void sleep();
-        void wake();
-
         /**
          * @brief Add a command to the command queue.
          * The valid commands are known at compile time.
@@ -102,26 +106,61 @@ namespace IPC
             this->command_queue.emplace(command);
             return true;
         }
+
+    protected:
+        using queue = etl::queue<etl::message_packet<cmds...>, 5>;
+        queue command_queue{};
+    };
+
+
+    // ===  Data interface to the BMS task ===
+    class BMS_Interface: public CommandQueue<
+        Command::Voltage,
+        Command::Current,
+        Command::Output>
+    {
+    public:
+        /* Define public data access */
+        [[nodiscard]] static auto get_battery_voltage() -> uint16_t;
+        [[nodiscard]] static auto get_battery_current() -> int16_t;
+        [[nodiscard]] static auto get_cell_voltage(unsigned char cell) -> uint16_t;
+        [[nodiscard]] static auto get_remaining_capacity() -> uint16_t;
+        [[nodiscard]] static auto get_soc() -> uint16_t;
+        [[nodiscard]] static auto get_time2empty() -> uint32_t;
+        [[nodiscard]] static auto get_time2full() -> uint32_t;
+        [[nodiscard]] static auto is_charging() -> bool;
+        [[nodiscard]] static auto outputs_enabled() -> bool;
+
+        /* Simple blocking interface functions*/
+        static void sleep();
+        static void wake();
+
     private:
         friend void ::Task_BMS(); // Allow the BMS task to access the command queue
-        etl::queue<commands, 10> command_queue{};
     };
 
     // ===  Data interface to the PD task ===
-    struct PD_Interface
+    class PD_Interface: public CommandQueue<Command::Output>
     {
-        void sleep();
-        void wake();
+    public:
+        /* Define public data access */
         [[nodiscard]] static auto get_voltage() -> uint16_t;
         [[nodiscard]] static auto get_current() -> uint16_t;
+
+        /* Simple blocking interface functions*/
+        static void sleep();
+        static void wake();
+
+    private:
+        friend void ::Task_PD(); // Allow the PD task to access the command queue
     };
 
     // ===  Data interface to the GUI task ===
     struct Display_Interface
     {
-        void sleep();
-        void wake();
-        void next_page();
+        static void sleep();
+        static void wake();
+        static void next_page();
     };
 }; // namespace IPC
 #endif

@@ -33,7 +33,7 @@ namespace System
             {};
 
         // Process all events
-        etl::state_chart_traits::event_id_t get_event(std::chrono::milliseconds current_time)
+        auto get_event(std::chrono::milliseconds current_time) -> etl::state_chart_traits::event_id_t 
         {
             // return the event ID when it is triggered
             if (user_timeout.is_triggered(current_time))
@@ -54,6 +54,6 @@ namespace System
             input_timeout.reset(current_time);
         };
     };
-};
+}; // namespace System
 
 #endif

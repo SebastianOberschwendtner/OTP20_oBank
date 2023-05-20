@@ -21,30 +21,31 @@
  ******************************************************************************
  * @file    task_pd.cpp
  * @author  SO
- * @version v3.0.0
+ * @version v3.1.0
  * @date    09-October-2021
  * @brief   Task for handling the Power Delivery of the oBank
  ******************************************************************************
  */
 
 // === Includes ===
-#include "drivers.h"
-#include "task.h"
-#include "interprocess.h"
+#include "task_pd.h"
 #include "configuration.h"
+#include "drivers.h"
+#include "interprocess.h"
+#include "task.h"
 #include <algorithm>
 
 // === Global data within task ===
-namespace {
+namespace
+{
     // *** I/O pins ***
     GPIO::PIN SCL(GPIO::Port::A, 9);
     GPIO::PIN SDA(GPIO::Port::A, 10);
-    GPIO::PIN EN_OTG(GPIO::Port::B, 5, GPIO::Mode::Output);
     GPIO::PIN EN_5V_AUX(GPIO::Port::B, 7, GPIO::Mode::Output);
     // *** i2c controller ***
     I2C::Controller i2c(IO::I2C_1, 100000);
     // *** PD controller ***
-    TPS65987::Controller PD(i2c);
+    TPS65987::Controller PD_Controller(i2c);
     TPS65987::PDO pdo;
     // *** IPC Mananger ***
     IPC::Manager ipc_manager(IPC::Check::PID<IPC::PD>());
@@ -58,6 +59,9 @@ namespace {
      */
     void initialize()
     {
+        // Disable the 5V AUX
+        EN_5V_AUX.set_low();
+
         // Setup the IPC interface
         ipc_manager.register_data(&ipc_interface);
         bms_interface = IPC::wait_for_data<IPC::BMS_Interface>(IPC::BMS);
@@ -68,8 +72,42 @@ namespace {
         i2c.enable();
 
         // Initialize the charger interface
-        EN_5V_AUX.set_low();
-        PD.initialize();
+        PD_Controller.initialize();
+
+        // Registers to write
+        TPS65987::GlobalConfiguration global_config;
+        TPS65987::PortConfiguration port_config;
+        TPS65987::PortControl port_control;
+        TPS65987::PDO pdo_;
+
+        // Set the PDO capabilities
+        pdo_.set_voltage(5000);
+        pdo_.set_current(500);
+        PD_Controller.buffer_data.fill(0);
+        PD_Controller.register_TX_source_capability({pdo_, 1});
+        pdo_.set_voltage(5000);
+        pdo_.set_current(2000);
+        PD_Controller.register_TX_source_capability({pdo_, 1});
+        pdo_.set_voltage(9000);
+        pdo_.set_current(2000);
+        PD_Controller.register_TX_source_capability({pdo_, 1});
+        PD_Controller.buffer_data[3] = 0b1100;
+        PD_Controller.write_register(TPS65987::Register::TX_Source_Cap);
+
+        // Set the Global Configuration
+        PD_Controller.read(global_config);
+        global_config.set_PP2config(1);
+        PD_Controller.write(global_config);
+
+        // Set the Port Configuration
+        PD_Controller.read(port_config);
+        port_config.set_TypeCStateMachine(0b00); // SINK State machine
+        PD_Controller.write(port_config);
+
+        // Set the port control
+        PD_Controller.read(port_control);
+        port_control.set_ChargerAdvertiseEnable(0b000);
+        PD_Controller.write(port_control);
 
         OTOS::Task::yield();
     };
@@ -80,73 +118,31 @@ namespace {
  */
 void Task_PD()
 {
-    using namespace TPS65987;
-
     // Setup stuff
     initialize();
 
-    // Registers to write
-    const class Status status;
-    class GlobalConfiguration global_config;
-    class PortConfiguration port_config;
-    const class PowerPathStatus power_status;
-    class PortControl port_control;
-    class PDO vSafe5V;
-    class PDO previous;
+    // Remember the previous PDO
+    TPS65987::PDO previous;
 
-    // Set the 5V capability
-    vSafe5V.set_voltage(5000);
-    vSafe5V.set_current(500);
-    PD.buffer_data.fill(0);
-    PD.register_TX_source_capability({vSafe5V, 1});
-    vSafe5V.set_voltage(5000);
-    vSafe5V.set_current(2000);
-    PD.register_TX_source_capability({vSafe5V, 1});
-    vSafe5V.set_voltage(9000);
-    vSafe5V.set_current(2000);
-    PD.register_TX_source_capability({vSafe5V, 1});
-    PD.buffer_data[3] = 0b1100;
-    PD.write_register(Register::TX_Source_Cap);
-
-    // Set the Global Configuration
-    PD.read(global_config);
-    global_config.set_PP2config(1);
-    PD.write(global_config);
-
-    // Set the Port Configuration
-    PD.read(port_config);
-    port_config.set_TypeCStateMachine(0b01);
-    PD.write(port_config);
-
-    // Set the port control
-    PD.read(port_control);
-    port_control.set_ChargerAdvertiseEnable(0b000);
-    PD.write(port_control);
+    // Setup the message router
+    PD::Handler handler(IPC::PID::PD); // NOLINT
 
     // Start looping
-    while(true)
+    while (true)
     {
-        // Select the the state machine when OTG state changes
-        EN_OTG.read_edge();
-        if (EN_OTG.rising_edge())
+        // Handle the command queue
+        while (not ipc_interface.command_queue.empty())
         {
-            PD.read(port_config);
-            port_config.set_TypeCStateMachine(0b01);
-            PD.write(port_config);
-        }
-        else if (EN_OTG.falling_edge())
-        {
-            PD.read(port_config);
-            port_config.set_TypeCStateMachine(0b00);
-            PD.write(port_config);
+            handler.receive(ipc_interface.command_queue.front().get());
+            ipc_interface.command_queue.pop();
         }
 
-        // read the current PDO
-        pdo = PD.read_active_pdo().value();
+        // Check whether the PDO changed and send it to the BMS
+        pdo = PD_Controller.read_active_pdo().value();
         if (pdo.voltage() != previous.voltage())
         {
-            bms_interface->push_command(IPC::Command::Voltage{ pdo.voltage() });
-            bms_interface->push_command(IPC::Command::Current{ pdo.current() });
+            bms_interface->push_command(IPC::Command::Voltage{pdo.voltage()});
+            bms_interface->push_command(IPC::Command::Current{pdo.current()});
         }
         previous = pdo;
         OTOS::Task::yield();
@@ -158,16 +154,12 @@ void Task_PD()
 /**
  * @brief Set everything up for sleepmode
  */
-void IPC::PD_Interface::sleep()
-{
-};
+void IPC::PD_Interface::sleep(){};
 
 /**
  * @brief Set everything up after waking up
  */
-void IPC::PD_Interface::wake()
-{
-};
+void IPC::PD_Interface::wake(){};
 
 /**
  * @brief Return the current PDO voltage.
@@ -185,4 +177,42 @@ auto IPC::PD_Interface::get_voltage() -> uint16_t
 auto IPC::PD_Interface::get_current() -> uint16_t
 {
     return pdo.current();
+};
+
+/**
+ * @brief Set the PD state machine according to the command.
+ * When enabling the output the Source state machine is used.
+ * When disabling the output the Sink state machine is used.
+ *
+ * @param msg Outputs message which contains the state to set.
+ */
+void PD::Handler::on_receive(const IPC::Command::Output &msg)
+{
+    // Shortcut for the output states
+    using states = IPC::Command::Output::State;
+
+    // Read the current PD port config
+    TPS65987::PortConfiguration port_config;
+    PD_Controller.read(port_config);
+    auto state_machine = port_config.TypeCStateMachine();
+
+    // Switch according to the state
+    switch (msg.state)
+    {
+        case states::Off:
+            state_machine = 0b00;
+            break;
+        case states::On:
+            state_machine = 0b01;
+            break;
+        case states::Toggle:
+            state_machine = (state_machine == 0b00) ? 0b01 : 0b00;
+            break;
+        default:
+            break;
+    }
+
+    // Update the port config
+    port_config.set_TypeCStateMachine(state_machine);
+    PD_Controller.write(port_config);
 };

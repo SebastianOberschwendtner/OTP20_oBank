@@ -53,7 +53,7 @@ namespace Event
 
         // *** Methods ***
 
-        bool is_triggered(std::chrono::milliseconds current_time);
+        auto is_triggered(std::chrono::milliseconds current_time) -> bool;
         void reset(std::chrono::milliseconds current_time);
     };
 
@@ -78,8 +78,7 @@ namespace Event
         Button(GPIO::PIN &button, GPIO::Edge edge) : button(&button), trigger_edge(edge){};
 
         // *** Methods ***
-
-        bool is_triggered(void);
+        auto is_triggered() -> bool;
     };
 
 };

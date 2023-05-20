@@ -22,6 +22,8 @@
 #define GUI_H_
 
 // === Includes ===
+#include <chrono>
+#include <cstdint>
 #include "graphics.h"
 #include "gui_state_machine.h"
 #include "gui_events.h"
@@ -37,7 +39,7 @@ namespace GUI
         Event::Next_Page next_page;
 
         // *** Methods ***
-        etl::state_chart_traits::event_id_t get_event(void)
+        auto get_event() -> etl::state_chart_traits::event_id_t 
         {
             // Check for triggered events and return their ID
             if (next_page.is_triggered())
@@ -49,16 +51,13 @@ namespace GUI
     };
 
     // === Functions ===
-    unsigned char* get_data_pointer(void);
-    void initialize_canvas(void);
-    void draw_main_info(const unsigned int voltage, const signed int current);
-    void draw_state_info(const bool output_enabled, const bool is_charging);
-    void draw_cell_info(const unsigned int cell_1, const unsigned int cell_2);
-    void draw_soc_info(const unsigned int capacity, const unsigned int soc);
-    void draw_time_info(const unsigned int time2empty, const unsigned int time2full);
-    void clear_canvas(void);
-};
-
-// Expose the canvas object
-extern Graphics::Canvas_BW canvas;
+    auto get_data_pointer() -> unsigned char*;
+    void initialize_canvas();
+    void draw_main_info(uint16_t voltage, int16_t current);
+    void draw_state_info(bool output_enabled, bool is_charging);
+    void draw_cell_info(uint16_t cell_1, uint16_t cell_2);
+    void draw_soc_info(uint16_t capacity, uint16_t soc);
+    void draw_time_info(uint32_t time2empty, uint32_t time2full);
+    void clear_canvas();
+}; // namespace GUI
 #endif

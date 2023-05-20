@@ -34,10 +34,9 @@ namespace Event
         bool event_active{false};
 
     public:
-
         // *** Methods ***
-        bool is_triggered(void);
-        void trigger(void);
+        auto is_triggered() -> bool;
+        void trigger();
 
     };
 };

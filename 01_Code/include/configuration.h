@@ -21,19 +21,19 @@
 /**
  * ==============================================================================
  * This file is intended to configure the oBank and set user specific parameters.
- * This file can be modified to fit your needs. 
+ * This file can be modified to fit your needs.
  * ==============================================================================
  */
 
 #ifndef CONFIGURATION_H_
 #define CONFIGURATION_H_
 #include <chrono>
-using namespace std::chrono_literals;
+#include <cstdint>
 
 namespace detail
 {
     // === Define the version of the oBank ===
-    constexpr char __version__[] = "v2.1.0";
+    constexpr char __version__[] = "v3.1.0"; // NOLINT
 };
 
 namespace User
@@ -41,10 +41,11 @@ namespace User
     // === Timeouts ===
     namespace Timeout
     {
+        using namespace std::chrono_literals;
         // === Timeout for the user interface ===
         /**
          * @brief The timeout for the user interface in milli seconds.
-         * @fixed: Add strong time type. 
+         * @fixed: Add strong time type.
          */
         constexpr auto Display = 15s;
 
@@ -52,14 +53,15 @@ namespace User
          * @brief The timeout for detecting a button hold.
          */
         constexpr auto Button_Hold = 250ms;
-    };
+    }; // namespace Timeout
 
     // === Power Parameters ===
     namespace Power
     {
         // === Charging Parameters ===
-        constexpr unsigned int Max_Charge_Current = 1000; // [mA]
+        constexpr uint16_t Max_Charge_Current = 1000; // [mA]
+        constexpr uint8_t SoC_minimum = 20;           // [%]
     };
-};
+}; // namespace User
 
 #endif

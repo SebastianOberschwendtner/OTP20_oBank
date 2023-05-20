@@ -18,14 +18,14 @@
  *
  */
 
-#ifndef TASK_BMS_H_
-#define TASK_BMS_H_
+#ifndef TASK_PD_H_
+#define TASK_PD_H_
 
 // === Includes ===
-#include "etl/message_router.h"
 #include "interprocess.h"
+#include "etl/message_router.h"
 
-namespace BMS
+namespace PD
 {
     /**
      * @brief Command handler for the BMS task.
@@ -35,18 +35,13 @@ namespace BMS
      * - Voltage
      * - Current
      */
-    class Handler : public etl::message_router<Handler,
-                                               IPC::Command::Voltage,
-                                               IPC::Command::Current,
-                                               IPC::Command::Output>
+    class Handler : public etl::message_router<Handler, IPC::Command::Output>
     {
-      public:
-        explicit Handler(const uint8_t router_id) : message_router(router_id){};
-        static void on_receive(const IPC::Command::Voltage &msg);
-        static void on_receive(const IPC::Command::Current &msg);
+    public:
+        explicit Handler(const uint8_t router_id) : message_router(router_id) {};
         static void on_receive(const IPC::Command::Output &msg);
-        void on_receive_unknown(const etl::imessage &msg){};
+        void on_receive_unknown(const etl::imessage &msg) {};
     };
-}; // namespace BMS
+}; // namespace PD
 
-#endif /* TASK_BMS_H_ */
+#endif /* TASK_PD_H_ */

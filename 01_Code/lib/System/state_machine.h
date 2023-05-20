@@ -22,6 +22,7 @@
 #define STATE_MACHINE_H_
 
 // === Includes ===
+#include <array>
 #include "etl/state_chart.h"
 
 namespace System
@@ -60,19 +61,19 @@ namespace System
     struct Actions
     {
         // *** Actions *** 
-        void Initialize(void);
-        void Sleep(void);
-        void Wake_Up(void);
-        void Handle_User_Input(void);
-        void Reset_Timeouts(void);
+        void Initialize();
+        void Sleep();
+        void Wake_Up();
+        void Handle_User_Input();
+        void Reset_Timeouts();
 
         // *** Guards ***
-        bool not_charging(void);
+        [[nodiscard]] auto not_charging() -> bool;
     };
 
     // === State Table ===
     using state = etl::state_chart_traits::state<Actions>;
-    constexpr state StateTable[] =
+    constexpr state StateTable[] = // NOLINT
     {
         // *** States ***
         //   |--------------------|-------------------------|-------------------|
@@ -93,7 +94,7 @@ namespace System
 //        | Source State       | Event                   | Target State        | Action                     | Guard                 |
 //        |--------------------|-------------------------|---------------------|----------------------------|-----------------------|
 transition(State_ID::Initialize, Event_ID::Always        , State_ID::Info_Idle),
-transition(State_ID::Info_Idle , Event_ID::User_Timeout  , State_ID::Sleep     , nullptr                    , &Actions::not_charging),
+transition(State_ID::Info_Idle , Event_ID::User_Timeout  , State_ID::Sleep     , nullptr                    , nullptr),
 transition(State_ID::Sleep     , Event_ID::Always        , State_ID::Info_Idle),
 transition(State_ID::Info_Idle , Event_ID::Button_Pressed, State_ID::Wait_Input),
 transition(State_ID::Wait_Input, Event_ID::Input_Timeout , State_ID::Info_Idle , &Actions::Handle_User_Input)

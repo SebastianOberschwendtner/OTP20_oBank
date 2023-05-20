@@ -54,18 +54,18 @@ namespace GUI
     struct Actions
     {
         // *** Actions *** 
-        void Draw_Main_Info(void);
-        void Draw_Status_Info(void);
-        void Draw_Cell_Info(void);
-        void Draw_SOC_Info(void);
-        void Draw_Time_Info(void);
-        void Draw_PD_Info(void);
-        void Clear_Buffer(void);
+        void Draw_Main_Info();
+        void Draw_Status_Info();
+        void Draw_Cell_Info();
+        void Draw_SOC_Info();
+        void Draw_Time_Info();
+        void Draw_PD_Info();
+        void Clear_Buffer();
     };
 
     // === State Table ===
     using state = etl::state_chart_traits::state<Actions>;
-    constexpr state StateTable[] =
+    constexpr state StateTable[] = // NOLINT
     {
         // *** States ***
         //   |---------------------|-------------------------|-------------------|
@@ -100,5 +100,5 @@ transition(State_ID::Time_Info  , Event_ID::Next_Page     , State_ID::PD_Info   
 transition(State_ID::PD_Info    , Event_ID::Always        , State_ID::PD_Info    , &Actions::Draw_PD_Info     , nullptr),
 transition(State_ID::PD_Info    , Event_ID::Next_Page     , State_ID::Main_Info  , &Actions::Clear_Buffer     , nullptr)
     };
-};
+}; // namespace GUI
 #endif
